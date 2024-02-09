@@ -1,0 +1,6 @@
+[submodule "vendor/asio"]
+	path = vendor/asio
+	url = https://github.com/OlivierLDff/asio.cmake.git
+[submodule "vendor/sfml"]
+	path = vendor/sfml
+	url = https://github.com/SFML/SFML.git
