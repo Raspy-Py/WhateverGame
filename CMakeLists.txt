@@ -82,9 +82,7 @@ include_directories(${PROJECT_NAME} vendor/sfml/include)
 ########
 # Asio #
 ########
-add_subdirectory(vendor/asio)
-target_link_libraries(${PROJECT_NAME} PRIVATE asio::asio)
-
+include_directories(${PROJECT_NAME} vendor/asio/asio/include)
 
 ##########################################################
 # Fixed CMakeLists.txt part
