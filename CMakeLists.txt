@@ -84,6 +84,13 @@ include_directories(${PROJECT_NAME} vendor/sfml/include)
 ########
 include_directories(${PROJECT_NAME} vendor/asio/asio/include)
 
+########################
+# Tine process library #
+########################
+add_subdirectory(vendor/tiny-process-library)
+target_link_libraries(${PROJECT_NAME} PRIVATE tiny-process-library)
+include_directories(${PROJECT_NAME} vendor/tiny-process-library)
+
 ##########################################################
 # Fixed CMakeLists.txt part
 ##########################################################

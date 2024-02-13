@@ -12,7 +12,7 @@ To compile for Linux run the following command in the project root:
 
 For Windows:
 ```bash
-.\CompileWindows.bat -O
+CompileWindows.bat -O
 ```
 
 [*] - Remove "-O" for debug build.
