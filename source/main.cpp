@@ -1,81 +1,21 @@
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
-#define ASIO_STANDALONE
+#include "network/async_client.h"
+#include "network/async_server.h"
+
 #include <asio.hpp>
-#include <asio/ts/buffer.hpp>
-#include <asio/ts/internet.hpp>
+#include <exception>
 
-#include <iostream>
-#include <fstream>
-#include <thread>
-#include <chrono>
-
-#include <process.hpp>
-
-std::vector<char> Buffer(20 * 1024);
-
-void ReadData(asio::ip::tcp::socket &socket) {
-  socket.async_read_some(
-      asio::buffer(Buffer.data(), Buffer.size()),
-      [&](std::error_code ec, std::size_t length) {
-        if (!ec) {
-          std::cout << "\nRead " << length << "bytes\n\n";
-          for (int i = 0; i < length; ++i) {
-            std::cout << Buffer[i];
-          }
-
-          ReadData(socket);
-        }
-      });
-}
-
-int main() {
-  using TinyProcessLib::Process;
-  Process process("cmd /C dir", "",
-                  [](const char *bytes, size_t n) {
-                    std::cout << "Output from external process: " << std::string(bytes, n) << std::endl;
-                  },
-                  [](const char *bytes, size_t n) {
-                    std::cout << "Errors from external process: " << std::string(bytes, n) << std::endl;
-                  });
-  auto exit_status = process.get_exit_status();
-  asio::error_code ec;
-  asio::io_context context;
-  asio::ip::tcp::endpoint endpoint(asio::ip::make_address("93.184.216.34", ec), 80);
-  asio::ip::tcp::socket socket(context);
-  socket.connect(endpoint);
-
-  if (!ec) {
-    std::cout << "Connected!" << std::endl;
-  } else {
-    std::cout << "Failed to connect! Error: " << ec.message() << std::endl;
+int main(int argc, char** argv)
+{
+  try {
+    asio::io_context io_context;
+    AsyncServer server(io_context, 8080);
+    AsyncClient client(io_context, "localhost", "8080");
+    client.Send("Yo, what's up?");
+    io_context.run();
+  } catch( std::exception& e)
+  {
+    std::cerr << "Error: " << e.what() << std::endl;
   }
 
-  std::string request = "GET /index.html HTTP/1.1\r\n"
-                        "Host: example.com\r\n"
-                        "Connection: close\r\n\r\n";
-
-  socket.write_some(asio::buffer(request.data(), request.size()), ec);
-  ReadData(socket);
-
-
-  // Use the VideoMode object to create a Window
-  auto vm = sf::VideoMode::getDesktopMode();
-  sf::RenderWindow window(vm, "Window Title");
-  sf::CircleShape circle(30);
-  circle.setPosition({100, 100});
-  circle.setFillColor({255, 255, 0, 255});
-
-  while (window.isOpen()) {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-      if (event.type == sf::Event::Closed)
-        window.close();
-
-      window.clear();
-      window.draw(circle);
-      window.display();
-    }
-  }
   return 0;
 }
