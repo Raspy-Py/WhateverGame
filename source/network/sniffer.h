@@ -33,21 +33,23 @@ class Sniffer {
  private:
   void StartReceive(){
     socket_.async_receive_from(
-      asio::buffer(buffer_), sender_endpoint_,
-      [&](const std::error_code& error, std::size_t bytes_recvd) {
-        if (!error && bytes_recvd > 0) {
-          std::string message(buffer_.data(), bytes_recvd);
-          callback_(message);
-        } else {
-          StartReceive();
-        }
-      });
+        asio::buffer(buffer_), sender_endpoint_,
+        [&](const std::error_code& error, std::size_t bytes_recvd) {
+          if (!error && bytes_recvd > 0) {
+            std::string message(buffer_.data(), bytes_recvd);
+            callback_(message);
+          } else {
+            StartReceive();
+          }
+        });
   }
  private:
-  udp::socket socket_;
-  udp::endpoint sender_endpoint_;
+  // Context should always go first
   asio::io_context io_context_;
   std::thread context_thread_;
+
+  udp::socket socket_;
+  udp::endpoint sender_endpoint_;
   std::function<void(const std::string&)> callback_;
 
   static constexpr size_t kBufferSize = 128;
