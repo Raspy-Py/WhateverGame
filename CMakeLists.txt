@@ -71,13 +71,14 @@ add_definitions(-DASIO_STANDALONE)
 # Project files, packages, libraries and so on
 ##########################################################
 
-file(GLOB NETWORK_SOURCES source/network/*)
-file(GLOB_RECURSE SOURCES source/*.cpp)
+#file(GLOB NETWORK_SOURCES source/network/*)
+#file(GLOB_RECURSE SOURCES source/*.cpp)
 #! Project main executable source compilation
 #add_executable(${PROJECT_NAME} ${SOURCES})
 
-add_executable(Server source/server.cpp ${NETWORK_SOURCES})
-add_executable(Client source/client.cpp ${NETWORK_SOURCES})
+#add_executable(Server source/server.cpp ${NETWORK_SOURCES})
+#add_executable(Client source/client.cpp ${NETWORK_SOURCES})
+add_executable(${PROJECT_NAME} source/main.cpp)
 
 ########
 # SFML #
@@ -92,33 +93,33 @@ add_subdirectory(vendor/sfml)
 ########
 # Asio #
 ########
-#include_directories(${PROJECT_NAME} vendor/asio/asio/include)
-include_directories(Server vendor/asio/asio/include)
-include_directories(Client vendor/asio/asio/include)
+include_directories(${PROJECT_NAME} vendor/asio/asio/include)
+#include_directories(Server vendor/asio/asio/include)
+#include_directories(Client vendor/asio/asio/include)
 
 ########################
 # Tine process library #
 ########################
 add_subdirectory(vendor/tiny-process-library)
-#target_link_libraries(${PROJECT_NAME} PRIVATE tiny-process-library)
-#include_directories(${PROJECT_NAME} vendor/tiny-process-library)
+target_link_libraries(${PROJECT_NAME} PRIVATE tiny-process-library)
+include_directories(${PROJECT_NAME} vendor/tiny-process-library)
 
-target_link_libraries(Client PRIVATE tiny-process-library)
-include_directories(Client vendor/tiny-process-library)
+#target_link_libraries(Client PRIVATE tiny-process-library)
+#include_directories(Client vendor/tiny-process-library)
 
 ##########################################################
 # Fixed CMakeLists.txt part
 ##########################################################
 
 INSTALL(PROGRAMS
-        #$<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
-        $<TARGET_FILE:Server>
-        $<TARGET_FILE:Client>
+        $<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+        #$<TARGET_FILE:Server>
+        #<TARGET_FILE:Client>
         DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-#set(ALL_TARGETS ${PROJECT_NAME})
-set(ALL_TARGETS Server Client)
+set(ALL_TARGETS ${PROJECT_NAME})
+#set(ALL_TARGETS Server Client)
 
 # Include CMake setup
 include(cmake/main-config.cmake)

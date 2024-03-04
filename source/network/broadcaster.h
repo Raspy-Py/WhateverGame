@@ -40,15 +40,15 @@ class Broadcaster {
  private:
   void StartSend(){
     socket_.async_send_to(
-        asio::buffer(message_), endpoint_,
-        [&](asio::error_code ec, size_t bytes_sent){
-          if (!ec){
-            StartSend();
-            callback_();
-          }else{
-            std::cerr << "Broadcaster error: failed to send message." << std::endl;
-          }
-        });
+      asio::buffer(message_), endpoint_,
+      [&](asio::error_code ec, size_t bytes_sent){
+        if (!ec){
+          StartSend();
+          callback_();
+        }else{
+          std::cerr << "Broadcaster error: failed to send message." << std::endl;
+        }
+      });
   }
 
  private:
