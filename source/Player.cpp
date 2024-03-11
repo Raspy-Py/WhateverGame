@@ -1,44 +1,28 @@
 #include "Player.hpp"
 #include <iostream>
 
-
-Player::Player() {
-
-}
-
-Player::Player(const std::pair<float, float>& pos, const std::pair<float, float>& sz
-        ,const char* file) : size(sz.first, sz.second),
-        position(pos.first, pos.second) {
-    // loading texture
-    bool isLoaded = texture.loadFromFile(file);
-    rect.setTexture(&texture);
-
-
-    setRectSize();
-    setRectPos();
-}
-
-
-Player::~Player() {
-
+Player::Player(const sf::Vector2f& pos, const sf::Vector2f& size, const std::string& file)
+    : size_(size.x, size.y), position_(pos.x, pos.y) {
+  if (!texture_.loadFromFile(file))
+    std::cerr << "Error: failed to load texture [" << file << "]. " << std::endl;
+  rect_.setTexture(&texture_);
+  setRectSize();
+  setRectPos();
 }
 
 void Player::setRectSize() {
-    rect.setSize(size);
+  rect_.setSize(size_);
 }
 
 void Player::setRectPos() {
-
-    rect.setPosition(position);
+  rect_.setPosition(position_);
 }
 
 sf::RectangleShape* Player::getShape() {
-    return &rect;
+  return &rect_;
 }
 
-
-
 void Player::moveRight() {
-    position.x += 1;
-    rect.setPosition({position.x + 1, position.y });
+  position_.x += 1;
+  rect_.setPosition({position_.x + 1, position_.y});
 }

@@ -1,25 +1,21 @@
 #pragma once
 #include "SFML/Graphics.hpp"
 
-class Player{
+class Player {
+ public:
+  Player() = default;
+  Player(const sf::Vector2f& pos, const sf::Vector2f& size, const std::string& file);
+  ~Player() = default;
 
-public:
-    Player();
-    Player(const std::pair<float, float>& pos, const std::pair<float, float>& size
-           ,const char* file);
-    ~Player();
+  void moveRight();
+  void setRectSize();
+  void setRectPos();
 
-    void moveRight();
-    void setRectSize();
-    void setRectPos();
+  sf::RectangleShape *getShape();
 
-    sf::RectangleShape* getShape();
-
-
-private:
-    sf::RectangleShape rect;
-    sf::Texture texture;
-    sf::Vector2f size;
-    sf::Vector2f position;
-
+ private:
+  sf::RectangleShape rect_;
+  sf::Texture texture_;
+  sf::Vector2f size_;
+  sf::Vector2f position_;
 };

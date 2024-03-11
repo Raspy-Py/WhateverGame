@@ -2,10 +2,11 @@
 #include <iostream>
 
 
-Menu::Menu(float w, float h, sf::Font& font): main_menu{sf::Text(font), sf::Text(font), sf::Text(font)} {
-  if ( !font.loadFromFile("../assets/fonts/IdealGothic Bold.otf") ) {
+Menu::Menu(float w, float h, sf::Font& font)
+    : main_menu{sf::Text(font), sf::Text(font), sf::Text(font)} {
+  if (!font.loadFromFile("../assets/fonts/IdealGothic Bold.otf"))
     std::cerr << "Error while loading font\n";
-  }
+
   std::string buttons[3] = {"Host the game", "Join the game", "         Exit"};
 
   for (size_t i = 0; i < 3; ++i) {
@@ -30,12 +31,14 @@ int Menu::pressed() {
 }
 
 void Menu::draw(sf::RenderWindow &window) {
-  for (size_t i = 0; i < 3; ++i) {
+  for (size_t i = 0; i < 3; ++i)
     window.draw(main_menu[i]);
-  }
 }
 
 void Menu::MoveDown() {
+  // TODO: fix
+  //  selected = (selected + 1) % num_buttons;
+
   if (selected + 1 <= 3) {
     main_menu[selected++].setFillColor(sf::Color::White);
     if (selected == 3) {
@@ -46,6 +49,10 @@ void Menu::MoveDown() {
 }
 
 void Menu::MoveUp() {
+  // TODO: fix
+  //  change "selected" type to unsigned integer, uint32_t for example
+  //  selected = min(num_buttons - 1, selected - 1)
+
   if (selected - 1 >= -1) {
     main_menu[selected--].setFillColor(sf::Color::White);
     if (selected == -1) {
