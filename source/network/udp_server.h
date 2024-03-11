@@ -74,7 +74,7 @@ class UDPServer {
     packet.message->Serialize(send_buffer_);
     socket_.async_send_to(
       asio::buffer(send_buffer_), packet.endpoint,
-      [this](asio::error_code ec, std::size_t bytes_sent){
+      [this](const asio::error_code& ec, std::size_t bytes_sent){
         if (!out_queue_.Empty())
           HandleSend();
       });
@@ -83,7 +83,7 @@ class UDPServer {
   void StartReceive(){
     socket_.async_receive_from(
       asio::buffer(recv_buffer_), remote_endpoint_,
-      [this](asio::error_code, std::size_t bytes_recvd){
+      [this](const asio::error_code&, std::size_t bytes_recvd){
         // if it's a first message from this client, record the endpoint
         if (auto res = clients_map_.insert({remote_endpoint_, client_uid_}); res.second)
           ++client_uid_;

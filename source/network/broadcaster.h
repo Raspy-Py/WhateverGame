@@ -9,7 +9,7 @@
 class Broadcaster {
   using udp = asio::ip::udp;
  public:
-  Broadcaster(uint16_t broadcast_port)
+  explicit Broadcaster(uint16_t broadcast_port)
       : io_context_(),
         socket_(io_context_, udp::endpoint(udp::v4(), 0)),
         endpoint_(asio::ip::address_v4::broadcast(), broadcast_port) {
@@ -21,10 +21,11 @@ class Broadcaster {
   }
 
   void Start(const std::string& message, std::function<void(void)>&& callback = []{}){
-    if (message != "" && message.size() > kMaxMessageSize) {
-      std::cerr << "Broadcaster error: message size should be (0, " << kMaxMessageSize << "]. " << std::endl;
+    if (!message.empty() && message.size() < kMaxMessageSize) {
+      std::cerr << "Broadcaster error: message size should be (0, " << kMaxMessageSize << "). " << std::endl;
       return;
     }
+    callback_ = callback;
     message_ = message;
     StartSend();
     context_thread_ = std::thread([&]{io_context_.run();});
@@ -52,7 +53,7 @@ class Broadcaster {
   }
 
  private:
-  // Context should always first
+  // Context should always go first
   asio::io_context io_context_;
   std::thread context_thread_;
 
