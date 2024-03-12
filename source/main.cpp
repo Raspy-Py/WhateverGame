@@ -32,3 +32,4 @@ std::unique_ptr<GameState> CreateEntryState(std::shared_ptr<StateManager> state_
 
   return std::make_unique<MainMenuState>(state_manager);
 }
+

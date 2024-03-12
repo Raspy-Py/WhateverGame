@@ -34,5 +34,21 @@ bool WhateverEngine::DoFrame(float delta_time) {
 }
 
 void WhateverEngine::DispatchEvents() {
+  sf::Event event;
+  window_.pollEvent(event);
+
+  // TODO: distinguish events of different players
+  switch (event.type)
+  {
+    case sf::Event::KeyPressed:
+      input_handler_->handleInput(&event.key.code);
+      break;
+
+    case sf::Event::Closed:
+      window_.close();
+      break;
+
+    default:break;
+  }
 
 }
