@@ -11,6 +11,8 @@ class Command {
   virtual ~Command();
   void Execute();
   void AddAction(Action* action);
+  void DeleteAction(Action* action);
+
 
  private:
   std::vector<Action*> actions_;
