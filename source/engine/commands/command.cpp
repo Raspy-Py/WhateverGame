@@ -9,7 +9,7 @@ void Command::AddAction(Action *action) {
 void Command::DeleteAction(Action *action) {
   // Delete given action
   auto it = std::find(actions_.begin(), actions_.end(), action);
-  if (it != a.end()) {
+  if (it != actions_.end()) {
     actions_.erase(it);
   } else {
     std::cout << "Action not found." << std::endl;
