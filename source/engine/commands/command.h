@@ -1,13 +1,19 @@
 #ifndef WHATEVERGAME_SOURCE_ENGINE_COMMAND_H_
 #define WHATEVERGAME_SOURCE_ENGINE_COMMAND_H_
 
-#include "iostream"
+#include <vector>
+#include <iostream>
+#include "actions/action.h"
 
 
 class Command {
  public:
   virtual ~Command();
-  virtual void execute();
+  void Execute();
+  void AddAction(Action* action);
+
+ private:
+  std::vector<Action*> actions_;
 };
 
 

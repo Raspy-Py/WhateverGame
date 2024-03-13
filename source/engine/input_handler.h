@@ -2,15 +2,20 @@
 #define WHATEVERGAME_SOURCE_ENGINE_INPUT_HANDLER_H_
 
 #include <SFML/Window.hpp>
-#include "command.h"
+#include <SFML/Graphics.hpp>
+#include <queue>
+
+#include "commands/command.h"
 
 class InputHandler
 {
  public:
-  void handleInput(sf::Keyboard::Key * key);
-
+  void HandleInput(sf::RenderWindow& window_);
+  void InputToQueue(sf::Keyboard::Key * key);
+  void ExecuteCommand();
 
  private:
+  std::queue<Command*> commands_queue_;
   Command* buttonX_;
   Command* buttonY_;
   Command* buttonA_;
