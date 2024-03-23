@@ -7,8 +7,8 @@
 
 class FireCommand : public Command {
  public:
-  FireCommand() = default;
-  ~FireCommand() override = default;
+  FireCommand();
+  ~FireCommand() override;
   void Execute() override;
 
  private:

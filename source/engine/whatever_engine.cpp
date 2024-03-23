@@ -5,7 +5,7 @@
 WhateverEngine::WhateverEngine(){
   state_manager_ = std::make_shared<StateManager>();
   state_manager_->PushState(CreateEntryState(state_manager_));
-  input_handler_ = std::make_shared<InputHandler>();
+  input_manager_ = std::make_shared<InputManager>();
 }
 WhateverEngine::~WhateverEngine() {
 
@@ -36,9 +36,9 @@ bool WhateverEngine::DoFrame(float delta_time) {
 
 void WhateverEngine::DispatchEvents() {
   // Handle user inputs
-  input_handler_->HandleInput(window_);
+  input_manager_->HandleInput(window_);
 
   // Execute commands for user's input
-  input_handler_->ExecuteCommand();
+  input_manager_->ExecuteCommand();
 
 }

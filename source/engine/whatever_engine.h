@@ -5,7 +5,7 @@
 #include <SFML/Graphics.hpp>
 #include "state_manager.h"
 #include "game_state.h"
-#include "input_handler.h"
+#include "input_manager.h"
 
 class WhateverEngine {
  public:
@@ -28,7 +28,7 @@ class WhateverEngine {
   // will gain a full control of state switching
   std::shared_ptr<StateManager> state_manager_;
   sf::RenderWindow window_;
-  std::shared_ptr<InputHandler> input_handler_;
+  std::shared_ptr<InputManager> input_manager_;
 };
 
 // Defined in the client code.
