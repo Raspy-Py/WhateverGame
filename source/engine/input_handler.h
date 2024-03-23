@@ -4,22 +4,24 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <queue>
+#include <unordered_map>
 
 #include "commands/command.h"
 
 class InputHandler
 {
  public:
+  InputHandler() = default;
+  ~InputHandler() = default;
   void HandleInput(sf::RenderWindow& window_);
-  void InputToQueue(sf::Keyboard::Key * key);
+  void InputToQueue(const sf::Keyboard::Key& key);
   void ExecuteCommand();
+  void AddCommand(const sf::Keyboard::Key& key,
+                  const std::shared_ptr<Command>& command);
 
  private:
-  std::queue<Command*> commands_queue_;
-  Command* buttonX_;
-  Command* buttonY_;
-  Command* buttonA_;
-  Command* buttonB_;
+  std::queue< sf::Keyboard::Key > inputs_queue_;
+  std::unordered_map<sf::Keyboard::Key, std::vector<std::shared_ptr<Command>> > commands_map_;
 };
 
 
