@@ -71,24 +71,22 @@ add_definitions(-DASIO_STANDALONE)
 # Project files, packages, libraries and so on
 ##########################################################
 
-#file(GLOB NETWORK_SOURCES source/network/*)
-#file(GLOB_RECURSE SOURCES source/*.cpp)
-#! Project main executable source compilation
-#add_executable(${PROJECT_NAME} ${SOURCES})
 
-#add_executable(Server source/server.cpp ${NETWORK_SOURCES})
-#add_executable(Client source/client.cpp ${NETWORK_SOURCES})
-add_executable(${PROJECT_NAME} source/main.cpp)
+file(GLOB_RECURSE SOURCES source/*.cpp)
+#! Project main executable source compilation
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# For consistency
+include_directories(${PROJECT_NAME} source)
+
 
 ########
 # SFML #
 ########
 add_subdirectory(vendor/sfml)
 # Link library to SFML privately.
-#target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window)
-#include_directories(${PROJECT_NAME} vendor/sfml/include)
-
-
+target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window)
+include_directories(${PROJECT_NAME} vendor/sfml/include)
 
 ########
 # Asio #

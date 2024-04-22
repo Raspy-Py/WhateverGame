@@ -97,4 +97,5 @@ fi
 
 if [[ "$remove_dirs" == true ]]; then
   rm -rf ./cmake-build-debug ./cmake-build-release
+  rm -rf ./include ./lib ./share
 fi

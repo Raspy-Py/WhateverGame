@@ -1,0 +1,14 @@
+libsfml-dev
+libasio-dev
+libx11-dev
+libxrandr-dev
+libxcursor-dev
+libxinerama-dev
+libxi-dev
+libgl1-mesa-dev
+libopenal-dev
+libudev-dev
+libfreetype6-dev
+libogg-dev
+libvorbis-dev
+libflac-dev
