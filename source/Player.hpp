@@ -1,5 +1,6 @@
 #pragma once
 #include "SFML/Graphics.hpp"
+#include "engine/resource_manager.h"
 
 class Player {
  public:
@@ -10,7 +11,6 @@ class Player {
   void moveRight();
   void setRectSize();
   void setRectPos();
-
   sf::RectangleShape *getShape();
 
  private:

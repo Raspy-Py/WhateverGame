@@ -1,5 +1,6 @@
 #include "engine/engine_common.h"
 #include "engine/play_state.h"
+#include "engine/resource_manager.h"
 
 #include <memory>
 #include <iostream>
@@ -11,8 +12,12 @@ class MainMenuState : public GameState{
   explicit MainMenuState(std::shared_ptr<Context> context) :
   GameState(std::move(context)), main_menu_(font_, font_, font_){
     // TODO: get font from ResourceManager
-    if (!font_.loadFromFile("../assets/fonts/IdealGothic Bold.otf"))
-      std::cerr << "Error while loading font\n";
+//    if (!font_.loadFromFile("../assets/fonts/IdealGothic Bold.otf"))
+//      std::cerr << "Error while loading font\n";
+    // should output not found in cache
+    font_ = GetContext()->resource_manager_->GetFont("../assets/fonts/IdealGothic Bold.otf");
+    // should output found in cache
+    font_ = GetContext()->resource_manager_->GetFont("../assets/fonts/IdealGothic Bold.otf");
   }
 
   void Update(float delta_time) override{

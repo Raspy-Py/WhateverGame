@@ -3,8 +3,10 @@
 
 Player::Player(const sf::Vector2f& pos, const sf::Vector2f& size, const std::string& file)
     : size_(size.x, size.y), position_(pos.x, pos.y) {
-  if (!texture_.loadFromFile(file))
-    std::cerr << "Error: failed to load texture [" << file << "]. " << std::endl;
+//  if (!texture_.loadFromFile(file))
+//    std::cerr << "Error: failed to load texture [" << file << "]. " << std::endl;
+  // use ResourceManager to load texture
+  texture_ = ResourceManager::GetTexture(file);
   rect_.setTexture(&texture_);
   setRectSize();
   setRectPos();

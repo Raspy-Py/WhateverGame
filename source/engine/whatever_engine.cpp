@@ -1,6 +1,7 @@
 #include "whatever_engine.h"
 #include "state_manager.h"
 #include "game_state.h"
+#include "Player.hpp"
 
 WhateverEngine::WhateverEngine(){
   context_ = std::make_shared<Context>();
@@ -15,6 +16,8 @@ WhateverEngine::~WhateverEngine() {
 int WhateverEngine::Run() {
   sf::Clock clock;
   float delta_time = 0;
+  auto player = std::make_shared<Player>();
+  
   do {
 
     // Update the stuff you want to update

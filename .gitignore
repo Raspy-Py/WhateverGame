@@ -486,3 +486,5 @@ MigrationBackup/
 # Customs
 .PVS-Studio
 .vscode
+include/
+lib/
