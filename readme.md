@@ -4,7 +4,7 @@
 - CMake
 
 ### Linux specific
-Project uses SFMl library which has a whole baunch of dependencies by itself. To install them on Ubuntu use the following command:
+Project uses SFML library which has a bunch of dependencies by itself. To install them on Ubuntu use the following command:
 
 
 ```bash
