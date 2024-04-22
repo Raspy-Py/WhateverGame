@@ -66,11 +66,8 @@ endif()
 ##########################################################
 file(GLOB_RECURSE SOURCES source/*.cpp)
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} ${SOURCES}
-        source/engine/caches/texture_cache.cpp
-        source/engine/caches/texture_cache.hpp
-        source/engine/caches/font_cache.cpp
-        source/engine/caches/font_cache.hpp)
+add_executable(${PROJECT_NAME} ${SOURCES})
+
 
 # For consistency
 include_directories(${PROJECT_NAME} source)

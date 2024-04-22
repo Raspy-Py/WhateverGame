@@ -11,13 +11,11 @@ class MainMenuState : public GameState{
  public:
   explicit MainMenuState(std::shared_ptr<Context> context) :
   GameState(std::move(context)), main_menu_(font_, font_, font_){
-    // TODO: get font from ResourceManager
-//    if (!font_.loadFromFile("../assets/fonts/IdealGothic Bold.otf"))
-//      std::cerr << "Error while loading font\n";
-    // should output not found in cache
+
     font_ = GetContext()->resource_manager_->GetFont("../assets/fonts/IdealGothic Bold.otf");
-    // should output found in cache
-    font_ = GetContext()->resource_manager_->GetFont("../assets/fonts/IdealGothic Bold.otf");
+    main_menu_[0].setFont(font_);
+    main_menu_[1].setFont(font_);
+    main_menu_[2].setFont(font_);
   }
 
   void Update(float delta_time) override{
@@ -38,9 +36,19 @@ class MainMenuState : public GameState{
         }
         break;
       case sf::Keyboard::Key::Enter:
+        if ( selected_ == 2 ) {
+          PopThisState();
+        } else if ( selected_ == 1 ) {
+          GetContext()->network_manager_->ConnectClient("localhost", "6000");
+          PopThisState();
+          PushNewState(std::make_unique<PlayState>(GetContext()));
 
-        PopThisState();
-        PushNewState(std::make_unique<PlayState>(GetContext()));
+        } else {
+          GetContext()->network_manager_->StartServer();
+          PopThisState();
+          PushNewState(std::make_unique<PlayState>(GetContext()));
+        }
+
       default:
         break;
     }

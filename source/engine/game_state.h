@@ -6,9 +6,9 @@
 #include "state_manager.h"
 #include "resource_manager.h"
 #include "input_manager.h"
+#include "network_manager.h"
 
-//class ResourceManager;
-//class StateManager;
+
 
 class Context {
  public:
@@ -17,17 +17,17 @@ class Context {
   std::unique_ptr<ResourceManager> resource_manager_;
   std::unique_ptr<sf::RenderWindow> window_;
   std::unique_ptr<InputManager> input_manager_;
+  std::unique_ptr<NetworkManager> network_manager_;
 
 
   Context(){
     state_manager_ = std::make_unique<StateManager>();
     resource_manager_ = std::make_unique<ResourceManager>();
     input_manager_ = std::make_unique<InputManager>();
+    network_manager_ = std::make_unique<NetworkManager>();
     window_ = std::make_unique<sf::RenderWindow>();
   }
 
-  void hello() {
-  }
 };
 
 class GameState {
