@@ -4,3 +4,6 @@
 [submodule "vendor/sfml"]
 	path = vendor/sfml
 	url = https://github.com/SFML/SFML.git
+[submodule "vendor/tiny-process-library"]
+	path = vendor/tiny-process-library
+	url = https://gitlab.com/eidheim/tiny-process-library.git
