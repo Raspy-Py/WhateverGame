@@ -6,7 +6,6 @@
 #include <queue>
 #include <unordered_map>
 
-#include "commands/command.h"
 
 class InputManager
 {
@@ -16,21 +15,22 @@ class InputManager
 
   void HandleInput(sf::RenderWindow& window_);
   void InputToQueue(const sf::Keyboard::Key& key);
+  sf::Keyboard::Key PopNextInput();
 
-  void ExecuteCommand();
-  void AddCommand(const sf::Keyboard::Key& key,
-                  const std::shared_ptr<Command>& command,
-                  int state);
-  void RemoveCommand(const sf::Keyboard::Key& key, int state);
+//  void ExecuteCommand();
+//  void AddCommand(const sf::Keyboard::Key& key,
+//                  const std::shared_ptr<Command>& command,
+//                  size_t state);
+//  void RemoveCommand(const sf::Keyboard::Key& key, int state);
 
-  void SetActiveState(int state);
+  void SetActiveState(size_t state);
   int GetActiveState() const;
 
  private:
-  int active_state_ = 0;
+  size_t active_state_ = 0;
   std::queue< sf::Keyboard::Key > inputs_queue_;
-  std::unordered_map< sf::Keyboard::Key,
-              std::vector<std::pair< std::shared_ptr<Command>, int >>> commands_map_;
+//  std::unordered_map<size_t, std::unordered_map< sf::Keyboard::Key,
+//              std::vector< std::shared_ptr<Command> >>> commands_map_;
 };
 
 

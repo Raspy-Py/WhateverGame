@@ -3,10 +3,11 @@
 #include "game_state.h"
 
 WhateverEngine::WhateverEngine(){
-  state_manager_ = std::make_shared<StateManager>();
-  state_manager_->PushState(CreateEntryState(state_manager_));
-  input_manager_ = std::make_shared<InputManager>();
+  context_ = std::make_shared<Context>();
+  context_->window_->create(sf::VideoMode(sf::Vector2u(800, 600)), "WhateverGame", sf::Style::Default);
+  context_->state_manager_->PushState(CreateEntryState(context_));
 }
+
 WhateverEngine::~WhateverEngine() {
 
 }
@@ -14,7 +15,6 @@ WhateverEngine::~WhateverEngine() {
 int WhateverEngine::Run() {
   float delta_time = 0;
   do {
-    DispatchEvents();
 
     // Update the stuff you want to update
     // ...
@@ -26,19 +26,15 @@ int WhateverEngine::Run() {
 
 bool WhateverEngine::DoFrame(float delta_time) {
   // Break the main game loop if there are not any states to update
-  if (!state_manager_->StatesAvailable())
+  if (!context_->state_manager_->StatesAvailable())
     return false;
 
-  state_manager_->DoFrame(delta_time, window_);
+  context_->state_manager_->DoFrame(delta_time, *(context_->window_));
 
   return true;
 }
 
 void WhateverEngine::DispatchEvents() {
-  // Handle user inputs
-  input_manager_->HandleInput(window_);
 
-  // Execute commands for user's input
-  input_manager_->ExecuteCommand();
 
 }

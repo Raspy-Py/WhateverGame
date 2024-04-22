@@ -1,7 +1,7 @@
 #include "input_manager.h"
 
 
-void InputManager::SetActiveState(int state) {
+void InputManager::SetActiveState(size_t state) {
   active_state_ = state;
 }
 
@@ -13,7 +13,10 @@ int InputManager::GetActiveState() const{
 void InputManager::HandleInput(sf::RenderWindow& window_){
 
   sf::Event event;
-  window_.pollEvent(event);
+  bool ok = window_.pollEvent(event);
+  if ( !ok ) {
+    return;
+  }
 
   switch (event.type)
   {
@@ -35,41 +38,50 @@ void InputManager::InputToQueue(const sf::Keyboard::Key& key) {
   inputs_queue_.push(key);
 }
 
-void InputManager::ExecuteCommand() {
+sf::Keyboard::Key InputManager::PopNextInput() {
   if ( inputs_queue_.empty() ) {
-//    std::cout << "No commands to execute" << std::endl;
-    return;
+    return {};
   }
 
-  // Getting next input
-  sf::Keyboard::Key input = inputs_queue_.front();
+  auto input = inputs_queue_.front();
   inputs_queue_.pop();
-
-  // Execute command according to certain input
-  auto it = commands_map_.find(input);
-  if (it != commands_map_.end()) {
-    auto commands = it->second;
-    for ( const auto& [c, state] : commands ) {
-         if ( active_state_ == state ) c->Execute();
-    }
-  }
+  return input;
 }
 
-void InputManager::AddCommand(const sf::Keyboard::Key& key,
-                              const std::shared_ptr<Command>& command,
-                              int state) {
-  commands_map_[key].emplace_back(command, state);
-}
-
-
-void InputManager::RemoveCommand(const sf::Keyboard::Key& key, int state) {
-  auto it = commands_map_.find(key);
-  if (it != commands_map_.end()) {
-    auto &key_commands = it->second;
-
-    key_commands.erase( std::remove_if( key_commands.begin() , key_commands.end() ,
-                                        [state](const std::pair<std::shared_ptr<Command>, int>& pair) {
-                                          return pair.second == state;
-    } ), key_commands.end() );
-  }
-}
+//void InputManager::ExecuteCommand() {
+//  if ( inputs_queue_.empty() ) {
+//    return;
+//  }
+//
+//  // Getting next input
+//  sf::Keyboard::Key input = inputs_queue_.front();
+//  inputs_queue_.pop();
+//
+//  // Execute command according to certain state
+//  auto state_map = commands_map_[active_state_];
+//  if ( !state_map.empty() ) {
+//    auto commands = state_map[input];
+//    for ( const auto& command : commands ) {
+//      command->Execute();
+//    }
+//  }
+//}
+//
+//void InputManager::AddCommand(const sf::Keyboard::Key& key,
+//                              const std::shared_ptr<Command>& command,
+//                              size_t state) {
+//  commands_map_[state][key].emplace_back(command);
+//}
+//
+//
+////void InputManager::RemoveCommand(const sf::Keyboard::Key& key, int state) {
+////  auto state_map = commands_map_[state];
+////  if ( !state_map.empty() ) {
+////    auto commands = state_map[key];
+////
+////    commands.erase( std::remove_if( commands.begin() , commands.end() ,
+////                                        [state](const std::shared_ptr<Command>& c) {
+////                                          return c == key;
+////    } ), commands.end() );
+////  }
+////}

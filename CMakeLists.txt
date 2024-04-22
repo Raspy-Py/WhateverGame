@@ -64,7 +64,7 @@ endif()
 ##########################################################
 # Project files, packages, libraries and so on
 ##########################################################
-file(GLOB_RECURSE SOURCES source/*.cpp source/commands/*.cpp)
+file(GLOB_RECURSE SOURCES source/*.cpp)
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME} ${SOURCES})
 

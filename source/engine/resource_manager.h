@@ -1,0 +1,12 @@
+#ifndef WHATEVERGAME_SOURCE_ENGINE_RESOURCE_MANAGER_H_
+#define WHATEVERGAME_SOURCE_ENGINE_RESOURCE_MANAGER_H_
+
+
+
+class ResourceManager {
+
+ public:
+  ResourceManager() = default;
+};
+
+#endif //WHATEVERGAME_SOURCE_ENGINE_RESOURCE_MANAGER_H_

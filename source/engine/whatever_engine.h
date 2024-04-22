@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <SFML/Graphics.hpp>
+#include <SFML/Window.hpp>
 #include "state_manager.h"
 #include "game_state.h"
 #include "input_manager.h"
@@ -26,15 +27,14 @@ class WhateverEngine {
   // Using a shared pointer, as the GameStates themselves should be able
   // to reference and change the StateManager. This way the client code
   // will gain a full control of state switching
-  std::shared_ptr<StateManager> state_manager_;
-  sf::RenderWindow window_;
-  std::shared_ptr<InputManager> input_manager_;
+  std::shared_ptr<Context> context_;
+
 };
 
 // Defined in the client code.
 // This function should be used for creating an initial state,
 // which will most probably be the main menu, and doing static
 // resources loading
-std::unique_ptr<GameState> CreateEntryState(std::shared_ptr<StateManager> state_manager);
+std::unique_ptr<GameState> CreateEntryState(std::shared_ptr<Context> context);
 
 #endif //WHATEVERGAME_SOURCE_WHATEVER_ENGINE_H_
