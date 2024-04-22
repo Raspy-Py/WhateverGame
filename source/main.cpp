@@ -55,7 +55,7 @@ class MainMenuState : public GameState{
       main_menu_[i].setFillColor(sf::Color{ sf::Color::White});
       main_menu_[i].setString(buttons[i]);
       main_menu_[i].setCharacterSize(30);
-      main_menu_[i].setPosition(sf::Vector2f( 800/3, 600/4 + (150*i) ));
+      main_menu_[i].setPosition(sf::Vector2f( 800.0f/3, 600.0f/4 + (150.0f*static_cast<float>(i)) ));
       GetContext()->window_->draw(main_menu_[i]);
     }
     main_menu_[selected_].setFillColor(sf::Color{ 255, 204, 140});

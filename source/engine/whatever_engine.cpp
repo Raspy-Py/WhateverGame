@@ -33,7 +33,13 @@ bool WhateverEngine::DoFrame(float delta_time) {
   if (!context_->state_manager_->StatesAvailable())
     return false;
 
-  context_->state_manager_->DoFrame(delta_time, *(context_->window_));
+  if (context_->window_->isOpen()) {
+    context_->state_manager_->DoFrame(delta_time, *(context_->window_));
+  }else{
+    // The window was close, so perform the graceful shutdown
+    while (context_->state_manager_->StatesAvailable())
+      context_->state_manager_->PopState();
+  }
 
   return true;
 }

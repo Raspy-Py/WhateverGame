@@ -7,8 +7,6 @@
 #include "resource_manager.h"
 #include "input_manager.h"
 
-//class ResourceManager;
-//class StateManager;
 
 class Context {
  public:
@@ -24,9 +22,6 @@ class Context {
     resource_manager_ = std::make_unique<ResourceManager>();
     input_manager_ = std::make_unique<InputManager>();
     window_ = std::make_unique<sf::RenderWindow>();
-  }
-
-  void hello() {
   }
 };
 
@@ -44,7 +39,7 @@ class GameState {
   void PopThisState();
   void PushNewState(std::unique_ptr<GameState> game_state);
 
-  std::shared_ptr<Context> GetContext() const { return context_; }
+  [[nodiscard]] std::shared_ptr<Context> GetContext() const { return context_; }
 
  private:
   std::shared_ptr<Context> context_;
