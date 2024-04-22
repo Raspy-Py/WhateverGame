@@ -25,6 +25,9 @@ class Context {
     input_manager_ = std::make_unique<InputManager>();
     window_ = std::make_unique<sf::RenderWindow>();
   }
+
+  void hello() {
+  }
 };
 
 class GameState {

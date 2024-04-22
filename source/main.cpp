@@ -1,7 +1,9 @@
 #include "engine/engine_common.h"
+#include "engine/play_state.h"
 
 #include <memory>
 #include <iostream>
+
 
 
 class MainMenuState : public GameState{
@@ -11,7 +13,6 @@ class MainMenuState : public GameState{
     // TODO: get font from ResourceManager
     if (!font_.loadFromFile("../assets/fonts/IdealGothic Bold.otf"))
       std::cerr << "Error while loading font\n";
-    main_menu_[0].setString("WhateverGame Menu");
   }
 
   void Update(float delta_time) override{
@@ -32,8 +33,9 @@ class MainMenuState : public GameState{
         }
         break;
       case sf::Keyboard::Key::Enter:
-        // TODO: add new state
+
         PopThisState();
+        PushNewState(std::make_unique<PlayState>(GetContext()));
       default:
         break;
     }
@@ -64,6 +66,8 @@ class MainMenuState : public GameState{
   }
 
   void OnExit() override{
+    GetContext()->window_->clear(sf::Color::Black);
+    GetContext()->window_->display();
     std::cout << "Exiting entry state." << std::endl;
   }
 

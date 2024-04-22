@@ -13,13 +13,14 @@ WhateverEngine::~WhateverEngine() {
 }
 
 int WhateverEngine::Run() {
+  sf::Clock clock;
   float delta_time = 0;
   do {
 
     // Update the stuff you want to update
     // ...
 
-    // delta_time = clock::get_time();
+     delta_time = clock.restart().asMicroseconds();
   } while (DoFrame(delta_time));
   return 0;
 }

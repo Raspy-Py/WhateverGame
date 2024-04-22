@@ -16,8 +16,11 @@ void StateManager::PopState(){
 }
 
 void StateManager::DoFrame(float delta_time, sf::RenderWindow& window){
-  game_states_.top()->Update(delta_time);
-  game_states_.top()->Draw(window);
+  if ( game_states_.top() ) {
+    game_states_.top()->Update(delta_time);
+    game_states_.top()->Draw(window);
+  }
+
 
   if (should_pop_){
     PopState();
