@@ -9,29 +9,30 @@
 class Broadcaster {
   using udp = asio::ip::udp;
  public:
-  explicit Broadcaster(uint16_t broadcast_port)
+  explicit Broadcaster(uint16_t broadcast_port, uint32_t cooldown = 1000)
       : io_context_(),
+        cooldown_(cooldown),
         socket_(io_context_, udp::endpoint(udp::v4(), 0)),
         endpoint_(asio::ip::address_v4::broadcast(), broadcast_port) {
     socket_.set_option(asio::socket_base::broadcast(true));
   }
 
   ~Broadcaster(){
-    Stop();
+    StopBroadcasting();
   }
 
-  void Start(const std::string& message, std::function<void(void)>&& callback = []{}){
-    if (!message.empty() && message.size() < kMaxMessageSize) {
+  void StartBroadcasting(const std::string& message, std::function<void(void)>&& user_callback = []{}){
+    if (!message.empty() && message.size() > kMaxMessageSize) {
       std::cerr << "Broadcaster error: message size should be (0, " << kMaxMessageSize << "). " << std::endl;
       return;
     }
-    callback_ = callback;
+    user_callback_ = user_callback;
     message_ = message;
     StartSend();
     context_thread_ = std::thread([&]{io_context_.run();});
   }
 
-  void Stop(){
+  void StopBroadcasting(){
     io_context_.stop();
 
     if (context_thread_.joinable())
@@ -44,12 +45,18 @@ class Broadcaster {
       asio::buffer(message_), endpoint_,
       [&](asio::error_code ec, size_t bytes_sent){
         if (!ec){
+          Callback();
           StartSend();
-          callback_();
         }else{
           std::cerr << "Broadcaster error: failed to send message." << std::endl;
         }
       });
+  }
+
+ private:
+  void Callback(){
+    user_callback_();
+    //std::this_thread::sleep_for(std::chrono::milliseconds(cooldown_));
   }
 
  private:
@@ -59,11 +66,13 @@ class Broadcaster {
 
   udp::socket socket_;
   udp::endpoint endpoint_;
-  std::function<void(void)> callback_ = []{};
+  std::function<void(void)> user_callback_ = []{};
+
+  std::string message_;
+  uint32_t cooldown_;
 
   // Should be the same as Sniffer's buffer size
   static constexpr size_t kMaxMessageSize = 128;
-  std::string message_;
 };
 
 #endif //WHATEVERGAME_SOURCE_NETWORK_BROADCASTER_H_
