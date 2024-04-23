@@ -28,7 +28,7 @@ class InputManager
 
  private:
   size_t active_state_ = 0;
-  std::queue< sf::Keyboard::Key > inputs_queue_;
+  std::queue<sf::Keyboard::Key> inputs_queue_;
 //  std::unordered_map<size_t, std::unordered_map< sf::Keyboard::Key,
 //              std::vector< std::shared_ptr<Command> >>> commands_map_;
 };

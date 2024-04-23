@@ -36,15 +36,16 @@ bool WhateverEngine::DoFrame(float delta_time) {
   if (context_->window_->isOpen()) {
     context_->state_manager_->DoFrame(delta_time, *(context_->window_));
   }else{
-    // The window was close, so perform the graceful shutdown
+    // The window was closed, so perform the graceful shutdown
     while (context_->state_manager_->StatesAvailable())
       context_->state_manager_->PopState();
+
+    return false;
   }
 
   return true;
 }
 
 void WhateverEngine::DispatchEvents() {
-
-
+  context_->input_manager_->HandleInput(*(context_->window_));
 }
