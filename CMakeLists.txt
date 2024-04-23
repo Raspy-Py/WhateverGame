@@ -77,13 +77,24 @@ file(GLOB_RECURSE GAME_SOURCES source/game/*.cpp)
 file(GLOB_RECURSE ENGINE_SOURCES source/engine/*.cpp)
 file(GLOB_RECURSE SERVER_SOURCES source/server/*.cpp)
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES})
+add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES}
+        source/engine/network_event.h
+        source/engine/network_manager.cpp
+        source/game/states/main_menu_state.h)
 add_executable(${SERVER_NAME} ${SERVER_SOURCES})
 
 # For consistency
 include_directories(${PROJECT_NAME} source)
 include_directories(${SERVER_NAME} source)
 
+
+########
+# YAML #
+########
+add_subdirectory(vendor/yaml-cpp)
+# Link library to SFML privately.
+target_link_libraries(${PROJECT_NAME} PRIVATE yaml-cpp::yaml-cpp)
+include_directories(${PROJECT_NAME} vendor/yaml-cpp/include)
 
 ########
 # SFML #
