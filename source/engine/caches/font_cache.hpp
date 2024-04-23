@@ -8,7 +8,7 @@ class FontCache {
   FontCache() = default;
   ~FontCache();
   void dispose();
-  sf::Font GetFont(const std::string& file_name);
+  sf::Font& GetFont(const std::string& file_name);
 
  private:
   std::unordered_map<std::string, sf::Font> font_map_;

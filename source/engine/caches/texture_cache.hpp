@@ -9,7 +9,7 @@ class TextureCache {
   TextureCache() = default;
   ~TextureCache();
   void dispose();
-  sf::Texture GetTexture(const std::string& file_name);
+  sf::Texture& GetTexture(const std::string& file_name);
 
  private:
   std::unordered_map<std::string, sf::Texture> texture_map_;
