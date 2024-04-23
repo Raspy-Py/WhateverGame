@@ -1,7 +1,7 @@
 #include <iostream>
 #include "resource_manager.h"
-#include "caches/texture_cache.hpp"
-#include "caches/font_cache.hpp"
+#include "engine/caches/texture_cache.hpp"
+#include "engine/caches/font_cache.hpp"
 
 TextureCache ResourceManager::texture_cache_;
 FontCache ResourceManager::font_cache_;

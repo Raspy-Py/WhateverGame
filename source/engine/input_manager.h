@@ -1,8 +1,8 @@
 #ifndef WHATEVERGAME_SOURCE_ENGINE_INPUT_MANAGER_H_
 #define WHATEVERGAME_SOURCE_ENGINE_INPUT_MANAGER_H_
 
-#include <SFML/Window.hpp>
-#include <SFML/Graphics.hpp>
+#include "SFML/Window.hpp"
+#include "SFML/Graphics.hpp"
 #include <queue>
 #include <unordered_map>
 

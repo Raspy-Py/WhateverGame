@@ -1,7 +1,7 @@
 #ifndef WHATEVERGAME_SOURCE_ENGINE_RESOURCE_MANAGER_H_
 #define WHATEVERGAME_SOURCE_ENGINE_RESOURCE_MANAGER_H_
-#include "caches/texture_cache.hpp"
-#include "caches/font_cache.hpp"
+#include "engine/caches/texture_cache.hpp"
+#include "engine/caches/font_cache.hpp"
 
 
 class ResourceManager {

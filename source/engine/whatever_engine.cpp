@@ -1,7 +1,7 @@
 #include "whatever_engine.h"
 #include "state_manager.h"
 #include "game_state.h"
-#include "Player.hpp"
+#include "game/Player.hpp"
 
 WhateverEngine::WhateverEngine(){
   context_ = std::make_shared<Context>();

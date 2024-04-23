@@ -4,7 +4,7 @@
 #include <vector>
 #include <stack>
 #include <memory>
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
 
 class GameState;
 

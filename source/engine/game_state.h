@@ -1,7 +1,7 @@
 #ifndef WHATEVERGAME_SOURCE_ENGINE_GAME_STATE_H_
 #define WHATEVERGAME_SOURCE_ENGINE_GAME_STATE_H_
 
-#include <SFML/Graphics.hpp>
+#include "SFML/Graphics.hpp"
 #include <memory>
 #include "state_manager.h"
 #include "resource_manager.h"

@@ -2,8 +2,8 @@
 #define WHATEVERGAME_SOURCE_WHATEVER_ENGINE_H_
 
 #include <memory>
-#include <SFML/Graphics.hpp>
-#include <SFML/Window.hpp>
+#include "SFML/Graphics.hpp"
+#include "SFML/Window.hpp"
 #include "state_manager.h"
 #include "game_state.h"
 #include "input_manager.h"

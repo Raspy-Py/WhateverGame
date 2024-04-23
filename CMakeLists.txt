@@ -74,7 +74,9 @@ add_definitions(-DASIO_STANDALONE)
 
 file(GLOB_RECURSE SOURCES source/*.cpp)
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${SOURCES}
+        source/server/WhateverServer.cpp
+        source/server/WhateverServer.h)
 
 # For consistency
 include_directories(${PROJECT_NAME} source)
