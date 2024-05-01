@@ -5,7 +5,11 @@ int main(){
 
   server.Start();
   server.StartBroadcasting();
-  server.Join();
+
+  server.WaitForStopSignal();
+
+  server.StopBroadcasting();
+  server.Stop();
 
   return 0;
 }

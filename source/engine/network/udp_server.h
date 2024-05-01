@@ -33,10 +33,15 @@ class UDPServer {
   }
 
   void Stop(){
+    if (io_context_.stopped()) return;
     io_context_.stop();
 
-    if (context_thread_.joinable())
-      context_thread_.join();
+    if (context_thread_.get_id() == std::this_thread::get_id()) {
+      context_thread_.detach();
+    } else {
+      if (context_thread_.joinable())
+        context_thread_.join();
+    }
   }
 
   virtual void OnReceive(Packet<T> packet) = 0;

@@ -1,87 +1,37 @@
 #include "input_manager.h"
-
-
-void InputManager::SetActiveState(size_t state) {
-  active_state_ = state;
-}
-
-
-int InputManager::GetActiveState() const{
-  return active_state_;
-}
+#include <cstring>
+#include <iostream>
 
 void InputManager::HandleInput(sf::RenderWindow& window_){
+  keys_pressed_.fill(false);
+  keys_released_.fill(false);
+  left_button_released_ = left_button_pressed_ = false;
+  right_button_released_ = right_button_pressed_ = false;
 
   sf::Event event;
-  bool ok = window_.pollEvent(event);
-  if ( !ok ) {
-    return;
+
+  while(window_.pollEvent(event)){
+    switch (event.type){
+      case sf::Event::KeyPressed:
+        keys_pressed_[static_cast<unsigned>(event.key.code)] = true;
+        break;
+      case sf::Event::KeyReleased:
+        keys_released_[static_cast<unsigned>(event.key.code)] = true; break;
+      case sf::Event::MouseButtonPressed:{
+        if (event.mouseButton.button == sf::Mouse::Button::Left) left_button_pressed_ = true;
+        if (event.mouseButton.button == sf::Mouse::Button::Right) right_button_pressed_ = true;
+        break;
+      }
+      case sf::Event::MouseButtonReleased:{
+        if (event.mouseButton.button == sf::Mouse::Button::Left) left_button_released_ = true;
+        if (event.mouseButton.button == sf::Mouse::Button::Right) right_button_released_ = true;
+        break;
+      }
+      case sf::Event::Closed:
+        window_.close();
+        break;
+    };
   }
 
-  switch (event.type)
-  {
-    case sf::Event::KeyPressed:
-      InputToQueue(event.key.code);
-      break;
-
-    case sf::Event::Closed:
-      window_.close();
-      break;
-
-    default:break;
-  }
-
+  mouse_position_ = sf::Mouse::getPosition(window_);
 }
-
-
-void InputManager::InputToQueue(const sf::Keyboard::Key& key) {
-  inputs_queue_.push(key);
-}
-
-sf::Keyboard::Key InputManager::PopNextInput() {
-  if ( inputs_queue_.empty() ) {
-    return {};
-  }
-
-  auto input = inputs_queue_.front();
-  inputs_queue_.pop();
-  return input;
-}
-
-//void InputManager::ExecuteCommand() {
-//  if ( inputs_queue_.empty() ) {
-//    return;
-//  }
-//
-//  // Getting next input
-//  sf::Keyboard::Key input = inputs_queue_.front();
-//  inputs_queue_.pop();
-//
-//  // Execute command according to certain state
-//  auto state_map = commands_map_[active_state_];
-//  if ( !state_map.empty() ) {
-//    auto commands = state_map[input];
-//    for ( const auto& command : commands ) {
-//      command->Execute();
-//    }
-//  }
-//}
-//
-//void InputManager::AddCommand(const sf::Keyboard::Key& key,
-//                              const std::shared_ptr<Command>& command,
-//                              size_t state) {
-//  commands_map_[state][key].emplace_back(command);
-//}
-//
-//
-////void InputManager::RemoveCommand(const sf::Keyboard::Key& key, int state) {
-////  auto state_map = commands_map_[state];
-////  if ( !state_map.empty() ) {
-////    auto commands = state_map[key];
-////
-////    commands.erase( std::remove_if( commands.begin() , commands.end() ,
-////                                        [state](const std::shared_ptr<Command>& c) {
-////                                          return c == key;
-////    } ), commands.end() );
-////  }
-////}

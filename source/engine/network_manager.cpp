@@ -31,20 +31,19 @@ void NetworkManager::StopServer() {
   }
 }
 
-void NetworkManager::SearchServers(std::span<int> broadcasting_ports, uint32_t timeout) {
-  // TODO: let's assume we only want to sniff one port for now
-  int broadcasting_port = broadcasting_ports[0];
-
-  Sniffer sniffer(broadcasting_port);
-  sniffer.Start(10, [&](std::string msg){
-    if (auto pos = msg.find(':'); pos != std::string::npos) {
-      std::string host = msg.substr(0, pos);
-      std::string port = msg.substr(pos + 1);
-      available_servers_.emplace_back(host, port);
-    }else{
-      std::cerr << "[CLIENT] Error: sniffer sniffed something strange: " << msg << std::endl;
-    }
-  });
+void NetworkManager::SearchServers(const std::vector<int>& broadcasting_ports, uint32_t timeout) {
+  for (int broadcasting_port : broadcasting_ports) {
+    sniffers_.emplace_back(std::make_unique<Sniffer>(broadcasting_port));
+    sniffers_.back()->Start(timeout, [&](std::string msg) {
+      if (auto pos = msg.find(':'); pos != std::string::npos) {
+        std::string host = msg.substr(0, pos);
+        std::string port = msg.substr(pos + 1);
+        available_servers_.emplace_back(host, port);
+      } else {
+        std::cerr << "[CLIENT] Error: sniffer sniffed something strange: " << msg << std::endl;
+      }
+    });
+  }
 }
 
 void NetworkManager::OnReceive(std::shared_ptr<Message<GameEventType>> message) {

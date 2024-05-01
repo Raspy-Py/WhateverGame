@@ -5,6 +5,7 @@
 #include "network_event.h"
 #include "network/network_common.h"
 #include "network/udp_client.h"
+#include "network/sniffer.h"
 
 #include <span>
 #include <string>
@@ -33,7 +34,7 @@ class NetworkManager : public UDPClient<GameEventType> {
    * Client control
    */
   // Searches for available servers in the local network
-  void SearchServers(std::span<int> broadcasting_ports, uint32_t timeout);
+  void SearchServers(const std::vector<int>& broadcasting_ports, uint32_t timeout);
 
   // Callback for processing received messages
   void OnReceive(std::shared_ptr<Message<GameEventType>> message) override;
@@ -47,6 +48,8 @@ class NetworkManager : public UDPClient<GameEventType> {
 
   std::mutex mutex_;
   std::vector<ServerAddress> available_servers_;
+
+  std::vector<std::unique_ptr<Sniffer>> sniffers_;
 };
 
 #endif //WHATEVERGAME_SOURCE_ENGINE_NETWORK_MANAGER_H_

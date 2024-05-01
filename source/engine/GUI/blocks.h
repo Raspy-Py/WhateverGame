@@ -91,7 +91,6 @@ class Block {
   State last_state_;
 };
 
-
 class Text final : public Block {
  public:
   explicit Text(const YAML::Node &layout_config);
@@ -104,8 +103,5 @@ class Text final : public Block {
   sf::Text text_;
 };
 
-class
-
-}
-
+};
 #endif //WHATEVERGAME_SOURCE_ENGINE_GUI_BLOCKS_H_

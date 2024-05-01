@@ -20,7 +20,7 @@ class WhateverServer : public UDPServer<GameEventType>, public Broadcaster {
 
   void OnReceive(Packet<GameEventType> packet) override;
   void StartBroadcasting();
-  void Join();
+  void WaitForStopSignal();
 
  private:
   // TODO: clean up this junk

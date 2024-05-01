@@ -5,70 +5,52 @@
 #include "game/states/play_state.h"
 #include "engine/resource_manager.h"
 
-class MainMenuState : public GameState{
+#include "temp_gui.h"
+
+class MainMenuState final : public GameState{
  public:
-  explicit MainMenuState(std::shared_ptr<Context> context) :
-      GameState(std::move(context)), main_menu_(font_, font_, font_) {
-    font_ = ResourceManager::GetFont("../assets/fonts/IdealGothic Bold.otf");
+  explicit MainMenuState(std::shared_ptr<Context> context)
+    : GameState(std::move(context)){
+    auto& resource_manager = ResourceManager::GetInstance();
+    auto& font = resource_manager.GetFont("poppins");
+
+    buttons_["create_game"] = {font, "Create Game", {{250.f,100.f}, {300.f,50.f}}, 40};
+    buttons_["join_game"] = {font, "Join Game", {{250.f,160.f}, {300.f,50.f}}, 40};
+    buttons_["exit_game"] = {font, "Exit Game", {{250.f,220.f}, {300.f,50.f}}, 40};
   }
 
-  void Update(float delta_time) override{
-    GetInputManager().HandleInput(GetWindow());
-    auto next_input = GetInputManager().PopNextInput();
-
-    switch (next_input) {
-      case sf::Keyboard::Key::Up:
-        if (selected_ > 0) {
-          --selected_;
-        }
-        break;
-      case sf::Keyboard::Key::Down:
-
-        if (selected_ < 2) {
-          ++selected_;
-        }
-        break;
-      case sf::Keyboard::Key::Enter:{
-        PopThisState();
+  void Update(float delta_time) final{
+    auto& input = GetInputManager();
+    if (input.IsLeftButtonPressed()){
+      auto mouse_position = input.GetMousePosition();
+      if (buttons_["create_game"].Contains(mouse_position)){
+        auto& networker = GetContext()->network_manager;
+        networker->StartServer(SERVER_PORT);
         PushNewState(std::make_unique<PlayState>(GetContext()));
+      }else if (buttons_["join_game"].Contains(mouse_position)){
+        PushNewState(std::make_unique<PlayState>(GetContext()));
+      }else if (buttons_["exit_game"].Contains(mouse_position)){
+        PopThisState();
       }
-      default:
-        break;
     }
-
   }
 
-  void Draw(sf::RenderWindow& window) override{
+  void Draw(sf::RenderWindow& window) final{
     GetWindow().clear(sf::Color::Black);
-
-    for ( size_t i = 0; i < 3; ++i ) {
-      main_menu_[i].setFont(font_);
-      main_menu_[i].setFillColor(sf::Color{ sf::Color::White});
-      main_menu_[i].setString(buttons[i]);
-      main_menu_[i].setCharacterSize(30);
-      main_menu_[i].setPosition(sf::Vector2f( 800.0f/3, 600.0f/4 + (150.0f*static_cast<float>(i)) ));
-      GetWindow().draw(main_menu_[i]);
-    }
-    main_menu_[selected_].setFillColor(sf::Color{ 255, 204, 140});
-    GetWindow().draw(main_menu_[selected_]);
+    for (auto& [name, button] : buttons_)
+      button.Draw(window);
     GetWindow().display();
   }
 
-  void OnEntry() override{
-    std::cout << "Entering entry state." << std::endl;
+  void OnEntry() final{
   }
 
-  void OnExit() override{
+  void OnExit() final{
     GetWindow().clear(sf::Color::Black);
     GetWindow().display();
-    std::cout << "Exiting entry state." << std::endl;
   }
 
- private:
-  sf::Font font_;
-  sf::Text main_menu_[3];
-  std::string buttons[3] = {"Host the game", "Join the game", "         Exit"};
-  size_t selected_ = 0;
+  std::unordered_map<std::string, Button> buttons_;
 };
 
 #endif //WHATEVERGAME_SOURCE_GAME_STATES_MAIN_MENU_STATE_H_

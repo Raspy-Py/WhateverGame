@@ -9,7 +9,7 @@
 class Broadcaster {
   using udp = asio::ip::udp;
  public:
-  explicit Broadcaster(uint16_t broadcast_port, uint32_t cooldown = 1000)
+  explicit Broadcaster(uint16_t broadcast_port, uint32_t cooldown = 200)
       : io_context_(),
         cooldown_(cooldown),
         socket_(io_context_, udp::endpoint(udp::v4(), 0)),
@@ -26,7 +26,7 @@ class Broadcaster {
       std::cerr << "Broadcaster error: message size should be (0, " << kMaxMessageSize << "). " << std::endl;
       return;
     }
-    user_callback_ = user_callback;
+    user_callback_ = std::move(user_callback);
     message_ = message;
     StartSend();
     context_thread_ = std::thread([&]{io_context_.run();});

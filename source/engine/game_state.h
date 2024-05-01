@@ -21,7 +21,7 @@ class Context {
     window = std::make_unique<sf::RenderWindow>();
     // TODO: the whole "Context" thing is bullshit. Especially those resources
     //  with non-default constructors. Redesign this part later.
-    network_manager = std::make_unique<NetworkManager>("WhateverServer");
+    network_manager = std::make_unique<NetworkManager>("./WhateverServer");
   }
 };
 

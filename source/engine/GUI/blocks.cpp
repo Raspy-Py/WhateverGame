@@ -63,7 +63,7 @@ Block::Block(const YAML::Node &layout_config) {
   content_area_type_.value = ParseAs<ContentAreaType>(layout_config["content"]["type"]);
 
   auto& resource_manager = ResourceManager::GetInstance();
-  font_.value = resource_manager.Get<sf::Font>(layout_config["font"].as<std::string>());
+  font_.value = resource_manager.GetFont(layout_config["font"].as<std::string>());
 
   content_size_.value = ParseAs<sf::Vector2f>(layout_config["content"]["size"]);
   content_size_.active = content_size_.hover = content_size_.value;

@@ -21,7 +21,7 @@ void Page::LoadLayout(const std::string &layout_path) {
 
     auto block_config = block.second;
     std::shared_ptr<Block> new_block;
-    Block::Config config;
+    /*
     if (block_config["type"].as<std::string>() == "container")
       new_block = std::make_shared<Container>(block_config);
     else if(block_config["type"].as<std::string>() == "input")
@@ -30,7 +30,7 @@ void Page::LoadLayout(const std::string &layout_path) {
       new_block = std::make_shared<Button>(block_config);
     else if(block_config["type"].as<std::string>() == "text")
       new_block = std::make_shared<Text>(block_config);
-
+    */
   }
 
 }
@@ -50,4 +50,4 @@ std::shared_ptr<Block> Page::GetBlock(const std::string &block_name) {
   return block_ptr->second->item;
 }
 
-} // namespace sgui
+}; // namespace sgui

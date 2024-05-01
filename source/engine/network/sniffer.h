@@ -26,9 +26,15 @@ class Sniffer {
   }
 
   void Stop(){
+    if (io_context_.stopped()) return; // Prevent multiple stops
     io_context_.stop();
-    if (context_thread_.joinable())
-      context_thread_.join();
+
+    if (context_thread_.get_id() == std::this_thread::get_id()) {
+      context_thread_.detach();
+    } else {
+      if (context_thread_.joinable())
+        context_thread_.join();
+    }
   }
 
  private:
@@ -41,18 +47,24 @@ class Sniffer {
             std::string message(buffer_.data(), bytes_recvd);
             callback_(message);
             StartReceive();  // Continue receiving
-            SetTimeout(5);   // Reset the timer if you want to continue sniffing
           } else if (!error) {
-            StartReceive();  // No data received, continue listening
+            StartReceive();
           }
         });
   }
 
   void SetTimeout(int timeout_seconds) {
     timer_.expires_from_now(std::chrono::seconds(timeout_seconds));
-    timer_.async_wait([this](const std::error_code& error) {
+    timer_.async_wait([this](const std::error_code &error) {
       if (!error) {
+        std::cout << "[CLIENT]: Sniffer timeout." << std::endl;
         Stop();
+      } else {
+        if (error == asio::error::operation_aborted) {
+          std::cout << "[CLIENT]: Timer was cancelled." << std::endl;
+        } else {
+          std::cout << "[CLIENT]: Error: " << error.message() << std::endl;
+        }
       }
     });
   }

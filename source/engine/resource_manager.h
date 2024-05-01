@@ -15,21 +15,37 @@ class ResourceManager {
   static ResourceManager& GetInstance();
   void LoadResourceMap(const std::string& resources);
 
-  template <typename T>
-  T& Get(const std::string& file_name);
-
   // Template specializations for each supported type
-  template<>
-  sf::Texture& Get<sf::Texture>(const std::string& name);
-  template<>
-  sf::Font& Get<sf::Font>(const std::string& name);
+  sf::Texture& GetTexture(const std::string& name) {
+    auto [it, inserted] = texture_map_.try_emplace(name);
+    if (inserted) {
+      if (auto pfile = file_map_.find(name); pfile == file_map_.end() || !it->second.loadFromFile(pfile->second)) {
+        std::cerr << "Error: failed to load texture [" << name << "]." << std::endl;
+      }
+    } else{
+      std::cerr << "Error: texture [" << name << "] does not exist." << std::endl;
+    }
+    return it->second;
+  }
+
+  sf::Font& GetFont(const std::string& name) {
+    auto [it, inserted] = font_map_.try_emplace(name);
+    if (inserted) {
+      if (auto pfile = file_map_.find(name); pfile == file_map_.end() || !it->second.loadFromFile(pfile->second)) {
+        std::cerr << "Error: failed to load font [" << name << "]." << std::endl;
+      }
+    } else{
+      std::cerr << "Error: font [" << name << "] does not exist." << std::endl;
+    }
+    return it->second;
+  }
 
  private:
   std::unordered_map<std::string, std::string> file_map_; // resource_name -> file_name
-  std::unordered_map<std::string, std::unique_ptr<sf::Font>> font_map_; // resource_name -> resource
-  std::unordered_map<std::string, std::unique_ptr<sf::Texture>> texture_map_; // resource_name -> resource
-  
- private:
+  std::unordered_map<std::string, sf::Font> font_map_; // resource_name -> resource
+  std::unordered_map<std::string, sf::Texture> texture_map_; // resource_name -> resource
+
+ protected:
   ResourceManager() = default;
 };
 

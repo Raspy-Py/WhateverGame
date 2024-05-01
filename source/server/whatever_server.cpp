@@ -35,21 +35,19 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
   SendToAllExcept({});
 
   // For now, I want to shut down the server, when it receives the greetings from the client
-  {
-    std::lock_guard<std::mutex> lk(cv_mutex_);
-    received_greetings_ = true;
-  }
+  received_greetings_ = true;
   cv_.notify_one();
 }
 
 void WhateverServer::StartBroadcasting(){
   auto msg = FindLocalIP() + ":" + std::to_string(port_);
   // For now send server cords only once
-  Broadcaster::StartBroadcasting(msg, [this]{ is_broadcasting_ = false;});
+  //Broadcaster::StartBroadcasting(msg, [this]{ is_broadcasting_ = false;});
+  std::cout << msg << std::endl;
+  Broadcaster::StartBroadcasting(msg, []{});
 }
 
-void WhateverServer::Join(){
+void WhateverServer::WaitForStopSignal(){
   std::unique_lock<std::mutex> lk(cv_mutex_);
   cv_.wait(lk, [this]{ return received_greetings_.load(); });
-  StopBroadcasting();
 }

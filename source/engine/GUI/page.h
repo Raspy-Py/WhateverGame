@@ -29,6 +29,6 @@ class Page {
   std::shared_ptr<BlockNode> dom_tree_root_;
 };
 
-} // namespace sgui
+}; // namespace sgui
 
 #endif //WHATEVERGAME_SOURCE_ENGINE_GUI_PAGE_H_

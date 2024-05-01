@@ -17,6 +17,7 @@ int WhateverEngine::Run() {
   float delta_time = 0;
 
   do {
+    DispatchEvents();
 
     // Update the stuff you want to update
     // ...
