@@ -1,73 +1,52 @@
 #ifndef WHATEVERGAME_SOURCE_ENGINE_NETWORK_MANAGER_H_
 #define WHATEVERGAME_SOURCE_ENGINE_NETWORK_MANAGER_H_
 
-#include "network/common.h"
 #include "process.hpp"
+#include "network_event.h"
+#include "network/network_common.h"
+#include "network/udp_client.h"
 
+#include <span>
+#include <string>
 #include <thread>
 #include <chrono>
 #include <atomic>
 
-class NetworkManager {
+class NetworkManager : public UDPClient<GameEventType> {
  public:
-  NetworkManager();
+  NetworkManager(const std::string &server_path)
+      : UDPClient<GameEventType>(),
+        server_path_(server_path) {}
+  ~NetworkManager() override { Disconnect(); }
 
-  void StartServer();
+  /*
+   * Server control
+   */
+  void StartServer(uint16_t port);
 
-  void ConnectClient(const std::string& address, const std::string& port);
+  // By design the server should be running indefinitely, unless
+  // some kind of agreed event occurs, but it can be forcefully
+  // shut down by calling this method
+  void StopServer();
 
-  void SendData(T t, float x, float y);
+  /*
+   * Client control
+   */
+  // Searches for available servers in the local network
+  void SearchServers(std::span<int> broadcasting_ports, uint32_t timeout);
 
-  std::shared_ptr<Packet<T>> ReceiveData();
+  // Callback for processing received messages
+  void OnReceive(std::shared_ptr<Message<GameEventType>> message) override;
+
+  // Returns a copy of the vector with available servers
+  std::vector<ServerAddress> GetAvailableServer();
+
+ private:
+  std::string server_path_;
+  std::unique_ptr<TinyProcessLib::Process> server_process_;
+
+  std::mutex mutex_;
+  std::vector<ServerAddress> available_servers_;
 };
-
-template<typename T>
-NetworkManager<T>::NetworkManager() {
-
-}
-
-template<typename T>
-void NetworkManager<T>::StartServer() {
-  std::string executable_path = "./WhateverGame"; // Path to the executable
-  std::string port = "8080"; // Port number as a string
-
-  std::string command = executable_path + " " + port;
-
-  try {
-    TinyProcessLib::Process process(
-        command, "",
-        [](const char *bytes, size_t n) { // This is the read_stdout function
-          std::cout << std::string(bytes, n);
-        },
-        [](const char *bytes, size_t n) { // This is the read_stderr function
-          std::cerr << std::string(bytes, n);
-        });
-
-    std::cout << "Started server in the separate process." << std::endl;
-  } catch (const std::exception &e) {
-    std::cerr << "Failed to start process: " << e.what() << std::endl;
-  }
-}
-
-template<typename T>
-void NetworkManager<T>::ConnectClient(const std::string &address, const std::string &port) {
-  //is_client_ = true;
-  //client_.Connect(address, port);
-}
-
-template<typename T>
-void NetworkManager<T>::SendData(T t, float x, float y) {
-  Message<T> msg;
-  msg.header.id = t;
-  msg << x << y;
-
-  //client_.Send(msg);
-}
-template<typename T>
-std::shared_ptr<Packet<T>> NetworkManager<T>::ReceiveData() {
-  //auto p = server_.PopPacket();
-  return {};
-}
-
 
 #endif //WHATEVERGAME_SOURCE_ENGINE_NETWORK_MANAGER_H_

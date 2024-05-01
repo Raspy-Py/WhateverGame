@@ -8,7 +8,7 @@ set(PROJECT_NAME WhateverGame)
 set(SERVER_NAME WhateverServer)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ##########################################################
@@ -77,10 +77,7 @@ file(GLOB_RECURSE GAME_SOURCES source/game/*.cpp)
 file(GLOB_RECURSE ENGINE_SOURCES source/engine/*.cpp)
 file(GLOB_RECURSE SERVER_SOURCES source/server/*.cpp)
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES}
-        source/engine/network_event.h
-        source/engine/network_manager.cpp
-        source/game/states/main_menu_state.h)
+add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES})
 add_executable(${SERVER_NAME} ${SERVER_SOURCES})
 
 # For consistency
@@ -92,7 +89,6 @@ include_directories(${SERVER_NAME} source)
 # YAML #
 ########
 add_subdirectory(vendor/yaml-cpp)
-# Link library to SFML privately.
 target_link_libraries(${PROJECT_NAME} PRIVATE yaml-cpp::yaml-cpp)
 include_directories(${PROJECT_NAME} vendor/yaml-cpp/include)
 
@@ -100,7 +96,6 @@ include_directories(${PROJECT_NAME} vendor/yaml-cpp/include)
 # SFML #
 ########
 add_subdirectory(vendor/sfml)
-# Link library to SFML privately.
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window)
 include_directories(${PROJECT_NAME} vendor/sfml/include)
 
@@ -123,13 +118,12 @@ include_directories(${PROJECT_NAME} vendor/tiny-process-library)
 ##########################################################
 
 INSTALL(PROGRAMS
-        $<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
+        $<TARGET_FILE:${PROJECT_NAME}>
         $<TARGET_FILE:${SERVER_NAME}>
         DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
 set(ALL_TARGETS ${PROJECT_NAME} ${SERVER_NAME})
-#set(ALL_TARGETS Server Client)
 
 # Include CMake setup
 include(cmake/main-config.cmake)

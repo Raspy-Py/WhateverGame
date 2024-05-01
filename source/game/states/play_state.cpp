@@ -10,8 +10,8 @@
 }
 
 void PlayState::Update(float delta_time) {
-  GetContext()->input_manager_->HandleInput(*GetContext()->window_);
-  auto next_input = GetContext()->input_manager_->PopNextInput();
+  GetContext()->input_manager->HandleInput(GetWindow());
+  auto next_input = GetInputManager().PopNextInput();
   switch (next_input) {
     case sf::Keyboard::Key::Left:
       player_position_.x -= 0.1f * delta_time;
@@ -33,9 +33,7 @@ void PlayState::Update(float delta_time) {
 }
 
 void PlayState::Draw(sf::RenderWindow &window) {
-  GetContext()->window_->clear(sf::Color::Black);
-
-  GetContext()->window_->draw(player_rect_);
-
-  GetContext()->window_->display();
+  GetWindow().clear(sf::Color::Black);
+  GetWindow().draw(player_rect_);
+  GetWindow().display();
 }

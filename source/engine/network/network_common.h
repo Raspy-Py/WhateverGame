@@ -10,6 +10,11 @@
 #include <iostream>
 #include "asio.hpp"
 
+struct ServerAddress{
+  std::string host;
+  std::string port;
+};
+
 template<typename T>
 struct MessageHeader{
   T id;

@@ -1,0 +1,10 @@
+layouts:
+  main_menu: "assets/layouts/main_menu_layout.yaml"
+  play_state: "assets/layouts/play_stata_layout.yaml"
+
+fonts:
+  gothic: "assets/fonts/IdealGothic Bold.otf"
+  poppins: "assets/fonts/Poppins-Regular.ttf"
+
+textures:
+  sviat: "assets/textures/test.png"

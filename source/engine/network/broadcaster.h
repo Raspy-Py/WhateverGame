@@ -55,8 +55,8 @@ class Broadcaster {
 
  private:
   void Callback(){
+    std::this_thread::sleep_for(std::chrono::milliseconds(cooldown_));
     user_callback_();
-    //std::this_thread::sleep_for(std::chrono::milliseconds(cooldown_));
   }
 
  private:
