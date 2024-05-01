@@ -14,10 +14,12 @@
 #include <atomic>
 
 class NetworkManager : public UDPClient<GameEventType> {
+  using message_ptr = std::shared_ptr<Message<GameEventType>>;
  public:
   NetworkManager(const std::string &server_path)
       : UDPClient<GameEventType>(),
-        server_path_(server_path) {}
+        server_path_(server_path),
+        on_receive_handler_([](message_ptr&&){}){}
   ~NetworkManager() override { Disconnect(); }
 
   /*
@@ -39,16 +41,21 @@ class NetworkManager : public UDPClient<GameEventType> {
   // Callback for processing received messages
   void OnReceive(std::shared_ptr<Message<GameEventType>> message) override;
 
+  // Set custom OnReceive handler
+  void SetOnReceiveHandler(std::function<void(message_ptr&&)>&& handler) { on_receive_handler_ = std::move(handler); }
+
   // Returns a copy of the vector with available servers
   std::vector<ServerAddress> GetAvailableServer();
 
  private:
+  std::function<void(message_ptr&& message)> on_receive_handler_;
+
+  // Operational stuff
   std::string server_path_;
   std::unique_ptr<TinyProcessLib::Process> server_process_;
 
   std::mutex mutex_;
   std::vector<ServerAddress> available_servers_;
-
   std::vector<std::unique_ptr<Sniffer>> sniffers_;
 };
 

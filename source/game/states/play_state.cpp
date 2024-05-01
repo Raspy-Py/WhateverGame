@@ -5,11 +5,11 @@
 
 PlayState::PlayState(std::shared_ptr<Context> context)
   : GameState(std::move(context)),
-    player_position_(400, 300),
-    player_size_(50, 50) {
-  player_rect_.setSize(player_size_);
+    passport_(0) {
+  player_rect_.setSize(player_size);
   player_rect_.setFillColor(sf::Color::Red);
-  player_rect_.setPosition(player_position_);
+  player_rect_.setOrigin(player_size/2.f);
+  player_rect_.setPosition({0.f, 0.f});
 
   auto& resource_manager = ResourceManager::GetInstance();
   auto& font = resource_manager.GetFont("gothic");
@@ -27,6 +27,8 @@ void PlayState::Update(float delta_time) {
     auto servers = networker->GetAvailableServer();
     if (!servers.empty()){
       text_.SetVisible(false);
+      ServerAddress server = servers[0];
+      networker->Connect(server.host, server.port);
     }
   }else {
     static int A = 0, D = 0, W = 0, S = 0;
@@ -43,8 +45,14 @@ void PlayState::Update(float delta_time) {
 
     if (speed_vector.length() > 0.0f) speed_vector = speed_vector.normalized();
 
-    player_position_ += speed_vector * delta_time * 1000.f;
-    player_rect_.setPosition(player_position_);
+    auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
+    player_rect_.setPosition(new_position);
+    if (server_accepted_connection_.load()) {
+      Message<GameEventType> msg;
+      msg.header.id = GameEventType::ClientUpdatePosition;
+      msg << passport_ << new_position;
+      networker->Send(msg);
+    }
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
     networker->StopServer();
@@ -52,18 +60,60 @@ void PlayState::Update(float delta_time) {
 }
 
 void PlayState::Draw(sf::RenderWindow &window) {
-  GetWindow().clear(sf::Color::Black);
+  window.clear(sf::Color::Black);
 
   if (text_.GetVisible()) text_.Draw(window);
-  else GetWindow().draw(player_rect_);
+  else {
+    window.draw(player_rect_);
+    for (auto& [id, player] : other_players_)
+      window.draw(player);
+  }
 
   kill_server_btn_.Draw(window);
-  GetWindow().display();
+  window.display();
 }
 void PlayState::OnEntry() {
-  auto& networker = GetContext()->network_manager;
+  auto &networker = GetContext()->network_manager;
   networker->SearchServers({BROADCASTING_PORT}, 3);
+  networker->SetOnReceiveHandler([this](std::shared_ptr<Message<GameEventType>> &&message) {
+    OnReceiveHandler(std::move(message));
+  });
 }
+
 void PlayState::OnExit() {
   GameState::OnExit();
+}
+
+void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&message) {
+  auto server_msg = *(message);
+
+  switch (server_msg.header.id) {
+    case GameEventType::ServerApproveConnection: {
+      server_msg >> passport_;
+      server_accepted_connection_ = true;
+      break;
+    }
+    case GameEventType::ServerUpdateNetworkData: {
+      sf::Vector2f other_player_position;
+      uint32_t other_player_id;
+
+      server_msg >> other_player_position >> other_player_id;
+      mutex_.lock();
+      if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
+        other_player_ptr->second.setPosition(other_player_position);
+      }else{
+        auto& other_player = other_players_[other_player_id];
+        other_player.setSize(player_size);
+        other_player.setOrigin(player_size/2.f);
+        other_player.setPosition(other_player_position);
+      }
+      mutex_.unlock();
+
+      break;
+    }
+    case GameEventType::ServerNotifyShutdown: {
+      break;
+    }
+    default: break;
+  }
 }

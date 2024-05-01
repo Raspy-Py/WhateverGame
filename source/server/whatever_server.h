@@ -10,6 +10,11 @@
 #include <atomic>
 
 class WhateverServer : public UDPServer<GameEventType>, public Broadcaster {
+  struct PlayerInfo{
+    float x;
+    float y;
+  };
+
  public:
   explicit WhateverServer(uint16_t server_port, uint16_t broadcast_port)
       : UDPServer<GameEventType>(server_port),
@@ -23,12 +28,17 @@ class WhateverServer : public UDPServer<GameEventType>, public Broadcaster {
   void WaitForStopSignal();
 
  private:
-  // TODO: clean up this junk
-  std::condition_variable cv_;
-  std::mutex cv_mutex_;
-  std::atomic_bool is_broadcasting_ = false;
-  std::atomic_bool received_greetings_ = false;
+  void FireStopSignal();
+
+ private:
+  // Game logic stuff
+  std::unordered_map<uint32_t, PlayerInfo> players_data_;
+
+  // Operational mess
   uint16_t port_;
+  std::mutex cv_mutex_;
+  std::condition_variable cv_;
+  std::atomic_bool should_shutdown_ = false;
 };
 
 #endif //WHATEVERGAME_SOURCE_MULTIPLAYER_WHATEVERSERVER_H_

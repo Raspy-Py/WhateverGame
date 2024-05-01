@@ -46,13 +46,11 @@ class UDPServer {
 
   virtual void OnReceive(Packet<T> packet) = 0;
 
-  void SendToExact(const Message<T>& msg, const udp::endpoint& endpoint){
-    auto client_ptr = clients_map_.find(endpoint);
-    if (client_ptr != clients_map_.end())
-      out_queue_.Push({
-        client_ptr->second, // endpoint
-        std::make_shared<Message<T>>(msg)
-      });
+  void SendToExact(const Message<T>& msg, const udp::endpoint& endpoint) {
+    out_queue_.Push({
+      endpoint,
+      std::make_shared<Message<T>>(msg)
+    });
   }
 
   void SendToAllExcept(const Message<T>& msg, uint32_t ignore_id = -1){
@@ -68,7 +66,7 @@ class UDPServer {
     clients_map_.erase(endpoint);
   }
 
-  const std::unordered_map<udp::endpoint, uint32_t>& clients_map(){
+  std::unordered_map<udp::endpoint, uint32_t>& clients_map(){
     return clients_map_;
   }
 

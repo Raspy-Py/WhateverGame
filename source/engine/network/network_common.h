@@ -30,6 +30,9 @@ struct Message{
     return body.size();
   }
 
+  /*
+   * These methods used for extracting data from Massage object or writing to
+   */
   template<typename DataType>
   friend Message<T>& operator<<(Message<T>& msg, const DataType& data){
     static_assert(std::is_standard_layout<DataType>::value, "Data is to complex for serialization");
@@ -51,6 +54,9 @@ struct Message{
     return msg;
   }
 
+  /*
+   * These two are use by server and client
+   */
   void Serialize(std::vector<char>& buffer) const {
     size_t header_size = sizeof(header);
     buffer.resize(sizeof(header) + Size());

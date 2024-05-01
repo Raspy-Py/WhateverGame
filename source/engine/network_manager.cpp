@@ -47,8 +47,7 @@ void NetworkManager::SearchServers(const std::vector<int>& broadcasting_ports, u
 }
 
 void NetworkManager::OnReceive(std::shared_ptr<Message<GameEventType>> message) {
-  std::cout << "[CLIENT]: Server responded to the greetings. Shutting down..." << std::endl;
-  Disconnect();
+  on_receive_handler_(std::move(message));
 }
 
 std::vector<ServerAddress> NetworkManager::GetAvailableServer() {
