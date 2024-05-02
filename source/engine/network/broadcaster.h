@@ -9,12 +9,14 @@
 class Broadcaster {
   using udp = asio::ip::udp;
  public:
-  explicit Broadcaster(uint16_t broadcast_port, uint32_t cooldown = 200)
+  explicit Broadcaster(const std::vector<uint16_t>& broadcast_ports, uint32_t cooldown = 200)
       : io_context_(),
         cooldown_(cooldown),
-        socket_(io_context_, udp::endpoint(udp::v4(), 0)),
-        endpoint_(asio::ip::address_v4::broadcast(), broadcast_port) {
+        socket_(io_context_, udp::endpoint(udp::v4(), 0)){
     socket_.set_option(asio::socket_base::broadcast(true));
+
+    for (uint16_t port : broadcast_ports)
+      endpoints_.emplace_back(asio::ip::address_v4::broadcast(), port);
   }
 
   ~Broadcaster(){
@@ -28,7 +30,8 @@ class Broadcaster {
     }
     user_callback_ = std::move(user_callback);
     message_ = message;
-    StartSend();
+    for (auto& endpoint : endpoints_)
+      StartSend(endpoint);
     context_thread_ = std::thread([&]{io_context_.run();});
   }
 
@@ -40,13 +43,13 @@ class Broadcaster {
   }
 
  private:
-  void StartSend(){
+  void StartSend(const udp::endpoint& endpoint){
     socket_.async_send_to(
-      asio::buffer(message_), endpoint_,
+      asio::buffer(message_), endpoint,
       [&](asio::error_code ec, size_t bytes_sent){
         if (!ec){
           Callback();
-          StartSend();
+          StartSend(endpoint);
         }else{
           std::cerr << "Broadcaster error: failed to send message." << std::endl;
         }
@@ -65,7 +68,7 @@ class Broadcaster {
   std::thread context_thread_;
 
   udp::socket socket_;
-  udp::endpoint endpoint_;
+  std::vector<udp::endpoint> endpoints_;
   std::function<void(void)> user_callback_ = []{};
 
   std::string message_;

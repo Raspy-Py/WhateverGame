@@ -16,9 +16,9 @@ class WhateverServer : public UDPServer<GameEventType>, public Broadcaster {
   };
 
  public:
-  explicit WhateverServer(uint16_t server_port, uint16_t broadcast_port)
+  explicit WhateverServer(uint16_t server_port, const std::vector<uint16_t> broadcast_ports)
       : UDPServer<GameEventType>(server_port),
-        Broadcaster(broadcast_port),
+        Broadcaster(broadcast_ports),
         port_(server_port) {}
 
   ~WhateverServer() override;

@@ -74,7 +74,7 @@ void PlayState::Draw(sf::RenderWindow &window) {
 }
 void PlayState::OnEntry() {
   auto &networker = GetContext()->network_manager;
-  networker->SearchServers({BROADCASTING_PORT}, 3);
+  networker->SearchServers({8888, 8889, 8890}, 3);
   networker->SetOnReceiveHandler([this](std::shared_ptr<Message<GameEventType>> &&message) {
     OnReceiveHandler(std::move(message));
   });
