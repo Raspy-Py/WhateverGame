@@ -33,7 +33,7 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
   switch (packet.message->header.id){
     case GameEventType::ClientRequestConnect: {
       std::cout << "[SERVER] Received connection request." << std::endl;
-      uint32_t client_id = clients_map()[packet.endpoint];
+      uint32_t client_id = clients_map()[packet.endpoint.address()].id;
       players_data_[client_id] = {}; // Initialize default player data structure
 
       // Send the client its passport id
@@ -46,22 +46,23 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       break;
     }
     case GameEventType::ClientDisconnect: {
-      uint32_t client_id = clients_map()[packet.endpoint];
+      auto address = packet.endpoint.address();
+      uint32_t client_id = clients_map()[address].id;
       players_data_.erase(client_id);
-
-      ForgetClient(packet.endpoint);
+      ForgetClient(address);
       break;
     }
     case GameEventType::ClientUpdatePosition: {
-
+      auto address = packet.endpoint.address();
       auto& msg = *(packet.message);
-      uint32_t client_id = clients_map()[packet.endpoint];
+      uint32_t client_id = clients_map()[address].id;
       PlayerInfo player_info;
       msg >> player_info;
+      /*
       std::cout << "[SERVER] Received client update position: ("
                 << player_info.x << "; "
                 << player_info.y << ") " << std::endl;
-
+      */
       players_data_[client_id] = player_info;
       std::cout << "TOTAL PLAYERS: " << players_data_.size() << "\t [";
       for (auto& [id, data] : players_data_) std::cout << id << ", ";
@@ -75,7 +76,7 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       break;
     }
     case GameEventType::ClientRequestServerShutdown: {
-      uint32_t client_id = clients_map()[packet.endpoint];
+      uint32_t client_id = clients_map()[packet.endpoint.address()].id;
       if (client_id == 0){ // Thus, it's been sent by server owner
         Message<GameEventType> msg;
         msg.header.id = GameEventType::ServerNotifyShutdown;

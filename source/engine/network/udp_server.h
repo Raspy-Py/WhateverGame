@@ -12,6 +12,11 @@ template <typename T>
 class UDPServer {
   using udp = asio::ip::udp;
 
+  struct ClientEntry{
+    udp::endpoint endpoint;
+    uint32_t id = -1;
+  };
+
  public:
   UDPServer(uint16_t port)
       : io_context_(),
@@ -55,18 +60,18 @@ class UDPServer {
 
   void SendToAllExcept(const Message<T>& msg, uint32_t ignore_id = -1){
     auto msg_ptr = std::make_shared<Message<T>>(msg);
-    for (auto& [endpoint, uid] : clients_map_) {
-      if (uid != ignore_id)
-        out_queue_.Push({endpoint, msg_ptr});
+    for (auto& [address, client_entry] : clients_map_) {
+      if (client_entry.id != ignore_id)
+        out_queue_.Push({client_entry.endpoint, msg_ptr});
     }
     HandleSend();
   }
 
-  void ForgetClient(const udp::endpoint& endpoint){
-    clients_map_.erase(endpoint);
+  void ForgetClient(const asio::ip::address& address){
+    clients_map_.erase(address);
   }
 
-  std::unordered_map<udp::endpoint, uint32_t>& clients_map(){
+  std::unordered_map<asio::ip::address, ClientEntry>& clients_map(){
     return clients_map_;
   }
 
@@ -88,8 +93,12 @@ class UDPServer {
       asio::buffer(recv_buffer_), remote_endpoint_,
       [this](const asio::error_code&, std::size_t bytes_recvd){
         // if it's a first message from this client, record the endpoint
-        if (auto res = clients_map_.insert({remote_endpoint_, client_uid_}); res.second)
-          ++client_uid_;
+        auto [it, inserted] = clients_map_.try_emplace(remote_endpoint_.address());
+        if (inserted)
+          it->second = {remote_endpoint_, client_uid_++};
+        else
+          it->second.endpoint = remote_endpoint_;
+
         recv_buffer_.resize(bytes_recvd);
         auto msg = std::make_shared<Message<T>>();
         msg->Deserialize(recv_buffer_, bytes_recvd);
@@ -118,7 +127,7 @@ class UDPServer {
   ThreadSafeQueue<Packet<T>> in_queue_;
   ThreadSafeQueue<Packet<T>> out_queue_;
 
-  std::unordered_map<udp::endpoint, uint32_t> clients_map_;
+  std::unordered_map<asio::ip::address, ClientEntry> clients_map_;
   uint32_t client_uid_;
 
   static constexpr size_t kMaxMsgSize = 1024;
