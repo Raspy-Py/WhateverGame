@@ -4,6 +4,7 @@
 #include "engine/game_state.h"
 
 #include "temp_gui.h"
+#include "../../engine/game_members/player.h"
 
 class PlayState: public GameState {
  public:
@@ -22,9 +23,9 @@ class PlayState: public GameState {
  private:
   uint32_t passport_;
   std::atomic_bool server_accepted_connection_ = false;
-  sf::RectangleShape player_rect_;
+  std::unique_ptr<Player> player_;
   std::mutex mutex_;
-  std::unordered_map<uint32_t, sf::RectangleShape> other_players_;
+  std::unordered_map<uint32_t, std::unique_ptr<Player>> other_players_;
 
   Text text_;
   Button kill_server_btn_;

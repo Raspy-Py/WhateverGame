@@ -7,34 +7,27 @@
 #include <iostream>
 
 class Player {
+ public:
+  Player(sf::Texture &texture, sf::Vector2f size);
+  ~Player() = default;
+  void Move(float distance);
+  void Rotate(float radians);
+  void Animate();
+  void Draw(sf::RenderWindow &window) const;
+
+  sf::Vector2f GetPosition() const {return position_; }
+  float GetDirection() const { return direction_; }
+  void SetDirection(float direction) { direction_ = direction; Animate(); }
+  void SetPosition(const sf::Vector2f& position) {position_ = position; Animate(); }
 
  private:
   sf::Sprite sprite_;
-  sf::Texture& texture_;
+  sf::Texture &texture_;
 
-  enum Facing {
-    down = 0,
-    downLeft = 1,
-    left = 2,
-    upLeft = 3,
-    up = 4,
-    upRight = 5,
-    right = 6,
-    downRight = 7,
-  };
-
-  Facing dir_;
-  sf::Vector2f player_size_;
+  float speed_ = 100.f;
+  float direction_;
   sf::Vector2f position_;
-
- public:
-  Player(sf::Texture& texture, sf::Vector2f size);
-  ~Player() = default;
-  void Move(sf::Vector2f new_position);
-  void Animate();
-  void Draw(sf::RenderWindow &window) const;
-  sf::Vector2f GetPosition() const;
-
+  sf::Vector2f player_size_;
 };
 
 

@@ -8,3 +8,5 @@ fonts:
 
 textures:
   sviat: "../assets/textures/test.png"
+  tank: "../assets/textures/red_default.png"
+

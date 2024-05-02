@@ -6,13 +6,12 @@
 PlayState::PlayState(std::shared_ptr<Context> context)
   : GameState(std::move(context)),
     passport_(0) {
-  player_rect_.setSize(player_size);
-  player_rect_.setFillColor(sf::Color::Red);
-  player_rect_.setOrigin(player_size/2.f);
-  player_rect_.setPosition({0.f, 0.f});
 
   auto& resource_manager = ResourceManager::GetInstance();
   auto& font = resource_manager.GetFont("gothic");
+  auto& player_texture = resource_manager.GetTexture("tank");
+
+  player_ = std::make_unique<Player>(player_texture, player_size);
   text_ = std::move(Text(font, "Searching for server...", {400.f, 300.f}));
   text_.SetVisible(true);
 
@@ -41,19 +40,15 @@ void PlayState::Update(float delta_time) {
     W = std::min(1, int(input.IsKeyPressed(sfk::W)) + W) - input.IsKeyReleased(sfk::W);
     S = std::min(1, int(input.IsKeyPressed(sfk::S)) + S) - input.IsKeyReleased(sfk::S);
 
-    static sf::Vector2f speed_vector{};
-    speed_vector = {
-        static_cast<float>(D - A),
-        static_cast<float>(S - W)
-    };
+    float rotation = static_cast<float>(D - A) * 0.01f;
+    float translation = static_cast<float>(S - W);
 
-    if (speed_vector.length() > 0.0f) {
-      speed_vector = speed_vector.normalized();
-      auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
-      player_rect_.setPosition(new_position);
+    if (translation != 0 || rotation != 0) {
+      player_->Rotate(rotation * delta_time);
+      player_->Move(translation * delta_time);
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ClientUpdatePosition;
-      msg << passport_ << new_position;
+      msg << passport_ << player_->GetPosition() << player_->GetDirection();
       networker->Send(msg);
     }
   }
@@ -67,9 +62,9 @@ void PlayState::Draw(sf::RenderWindow &window) {
 
   if (text_.GetVisible()) text_.Draw(window);
   else {
-    window.draw(player_rect_);
+    player_->Draw(window);
     for (auto& [id, player] : other_players_)
-      window.draw(player);
+      player->Draw(window);
   }
 
   kill_server_btn_.Draw(window);
@@ -101,8 +96,9 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
     case GameEventType::ServerUpdateNetworkData: {
       sf::Vector2f other_player_position;
       uint32_t other_player_id;
-
-      server_msg >> other_player_position >> other_player_id;
+      float direction;
+      sf::Vector2f position;
+      server_msg >> direction >>  position >> other_player_id;
       if (other_player_id == passport_) return;
       /*
       std::cout << "[CLIENT] Received other player location: ("
@@ -115,13 +111,13 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       */
       mutex_.lock();
       if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
-        other_player_ptr->second.setPosition(other_player_position);
+        other_player_ptr->second->SetDirection(direction);
+        other_player_ptr->second->SetPosition(position);
       }else{
         auto& other_player = other_players_[other_player_id];
-        other_player.setSize(player_size);
-        other_player.setOrigin(player_size/2.f);
-        other_player.setPosition(other_player_position);
-        other_player.setFillColor(sf::Color::Cyan);
+        auto& resource_manager = ResourceManager::GetInstance();
+        auto& player_texture = resource_manager.GetTexture("tank");
+        other_player = std::make_unique<Player>(player_texture, player_size);
       }
       mutex_.unlock();
 
