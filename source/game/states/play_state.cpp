@@ -29,6 +29,10 @@ void PlayState::Update(float delta_time) {
       text_.SetVisible(false);
       ServerAddress server = servers[0];
       networker->Connect(server.host, server.port);
+
+      Message<GameEventType> msg;
+      msg.header.id = GameEventType::ClientRequestConnect;
+      networker->Send(msg);
     }
   }else {
     static int A = 0, D = 0, W = 0, S = 0;
@@ -47,7 +51,7 @@ void PlayState::Update(float delta_time) {
       speed_vector = speed_vector.normalized();
       auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
       player_rect_.setPosition(new_position);
-      if (server_accepted_connection_.load() || true) {
+      if (server_accepted_connection_.load()) {
         Message<GameEventType> msg;
         msg.header.id = GameEventType::ClientUpdatePosition;
         msg << passport_ << new_position;
@@ -102,11 +106,15 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       uint32_t other_player_id;
 
       server_msg >> other_player_position >> other_player_id;
+      if (other_player_id == passport_) return;
       /*
       std::cout << "[CLIENT] Received other player location: ("
                 << other_player_position.x << ": "
                 << other_player_position.y << ")" << std::endl;
       */
+      std::cout << "[CLIENT] TOTAL PLAYERS: " << other_players_.size() << "\t[";
+      for (auto& [id, _] : other_players_) std::cout << id << ", ";
+      std::cout << "]" << std::endl;
       mutex_.lock();
       if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
         other_player_ptr->second.setPosition(other_player_position);
