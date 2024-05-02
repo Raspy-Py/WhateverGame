@@ -81,7 +81,6 @@ class UDPServer {
     Packet<T> packet;
     if (!out_queue_.TryPop(packet)) return;
     packet.message->Serialize(send_buffer_);
-    std::cout << "SENDING APROVAL TO " << packet.endpoint.address().to_string() << std::endl;
     socket_.async_send_to(
       asio::buffer(send_buffer_), packet.endpoint,
       [this](const asio::error_code& ec, std::size_t bytes_sent){
@@ -102,9 +101,10 @@ class UDPServer {
           it->second.endpoint = remote_endpoint_;
 
         recv_buffer_.resize(bytes_recvd);
-        auto msg = std::make_shared<Message<T>>();
-        msg->Deserialize(recv_buffer_, bytes_recvd);
-        in_queue_.Push({ remote_endpoint_, msg });
+        Message<T> msg;
+        msg.Deserialize(recv_buffer_, bytes_recvd);
+        recv_buffer_.resize(kMaxMsgSize);
+        in_queue_.Push({ remote_endpoint_, std::make_shared<Message<T>>(msg) });
         HandleReceive();
       });
   }

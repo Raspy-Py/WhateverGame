@@ -49,21 +49,21 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       break;
     }
     case GameEventType::ClientUpdatePosition: {
-      auto address = packet.endpoint.address();
       auto& msg = *(packet.message);
-      uint32_t client_id = clients_map()[address].id;
-      PlayerInfo player_info;
-      msg >> player_info;
+      uint32_t client_id = 0;
+      PlayerInfo player_info{};
+      msg >> player_info >> client_id;
+      players_data_[client_id] = player_info;
+
       /*
-      std::cout << "[SERVER] Received client update position: ("
+      std::cout << "[SERVER] player: " << client_id << "moved to: ("
                 << player_info.x << "; "
                 << player_info.y << ") " << std::endl;
-      */
-      players_data_[client_id] = player_info;
+
       std::cout << "TOTAL PLAYERS: " << players_data_.size() << "\t [";
       for (auto& [id, data] : players_data_) std::cout << id << ", ";
       std::cout << "] " << std::endl;
-
+      */
       // TODO: THIS IS SUPER STRANGE ASYNCHRONOUS TICKLESS APPROACH
       Message<GameEventType> server_msg;
       server_msg.header.id = GameEventType::ServerUpdateNetworkData;

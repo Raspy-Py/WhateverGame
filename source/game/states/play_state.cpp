@@ -56,8 +56,6 @@ void PlayState::Update(float delta_time) {
       msg << passport_ << new_position;
       networker->Send(msg);
     }
-
-
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
     networker->StopServer();
@@ -110,10 +108,11 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       std::cout << "[CLIENT] Received other player location: ("
                 << other_player_position.x << ": "
                 << other_player_position.y << ")" << std::endl;
-      */
+
       std::cout << "[CLIENT] TOTAL PLAYERS: " << other_players_.size() << "\t[";
       for (auto& [id, _] : other_players_) std::cout << id << ", ";
       std::cout << "]" << std::endl;
+      */
       mutex_.lock();
       if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
         other_player_ptr->second.setPosition(other_player_position);

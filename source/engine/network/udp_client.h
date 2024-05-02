@@ -48,7 +48,11 @@ class UDPClient {
  private:
   void HandleSend(){
     std::shared_ptr<Message<T>> msg_ptr;
-    out_queue_.TryPop(msg_ptr);
+    if (!out_queue_.TryPop(msg_ptr)) {
+      std::cerr << "[CLIENT] Tried to send data, but message queue is empty." << std::endl;
+      return;
+    }
+
     msg_ptr->Serialize(send_buffer_);
     socket_.async_send_to(
       asio::buffer(send_buffer_), server_endpoint_,
@@ -72,6 +76,7 @@ class UDPClient {
         }
         auto msg_ptr = std::make_shared<Message<T>>();
         msg_ptr->Deserialize(recv_buffer_, bytes_recvd);
+        recv_buffer_.resize(kMaxMsgSize);
         in_queue_.Push(msg_ptr);
         HandleReceive();
       });

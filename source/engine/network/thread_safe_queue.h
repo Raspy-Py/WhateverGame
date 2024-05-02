@@ -32,7 +32,8 @@ class ThreadSafeQueue {
   void WaitAndPop(T& value) {
     std::unique_lock<std::mutex> lock(mutex_);
     cv_.wait(lock, [this]{ return !queue_.empty(); });
-    value = std::move(queue_.front());
+    T& temp_value = queue_.front();
+    value = std::move(temp_value);
     queue_.pop();
   }
 
