@@ -25,6 +25,7 @@ class Player {
   sf::Texture &texture_;
 
   float speed_ = 100.f;
+  float rotation_speed_ = 1.f;
   float direction_;
   sf::Vector2f position_;
   sf::Vector2f player_size_;

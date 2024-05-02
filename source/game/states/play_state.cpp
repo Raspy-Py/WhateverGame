@@ -40,12 +40,15 @@ void PlayState::Update(float delta_time) {
     W = std::min(1, int(input.IsKeyPressed(sfk::W)) + W) - input.IsKeyReleased(sfk::W);
     S = std::min(1, int(input.IsKeyPressed(sfk::S)) + S) - input.IsKeyReleased(sfk::S);
 
-    float rotation = static_cast<float>(D - A) * 0.01f;
+    float rotation = static_cast<float>(D - A);
     float translation = static_cast<float>(S - W);
 
     if (translation != 0 || rotation != 0) {
       player_->Rotate(rotation * delta_time);
       player_->Move(translation * delta_time);
+      auto pos = player_->GetPosition();
+      auto dir = player_->GetDirection();
+      std::cout << "Position: (" << pos.x << "; " << pos.y << ") dir: " << dir << std::endl;
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ClientUpdatePosition;
       msg << passport_ << player_->GetPosition() << player_->GetDirection();
