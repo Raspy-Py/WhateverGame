@@ -55,10 +55,9 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
     case GameEventType::ClientUpdatePosition: {
 
       auto& msg = *(packet.message);
-
+      uint32_t client_id = clients_map()[packet.endpoint];
       PlayerInfo player_info;
-      uint32_t client_id;
-      msg >> player_info >> client_id;
+      msg >> player_info;
       std::cout << "[SERVER] Received client update position: ("
                 << player_info.x << "; "
                 << player_info.y << ") " << std::endl;
