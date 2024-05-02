@@ -16,6 +16,9 @@ void ResourceManager::LoadResourceMap(const std::string &resources) {
 
   font_map_.clear();
   texture_map_.clear();
+
+  font_map_.reserve(100);
+  texture_map_.reserve(100);
 }
 
 ResourceManager& ResourceManager::GetInstance() {

@@ -119,7 +119,7 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       }else{
         auto& other_player = other_players_[other_player_id];
         auto& resource_manager = ResourceManager::GetInstance();
-        auto& player_texture = resource_manager.GetTexture("tank");
+        auto& player_texture = resource_manager.GetTexture("enemy_tank");
         other_player = std::make_unique<Player>(player_texture, player_size);
       }
       mutex_.unlock();
