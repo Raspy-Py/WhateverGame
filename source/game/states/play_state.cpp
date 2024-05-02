@@ -47,7 +47,7 @@ void PlayState::Update(float delta_time) {
 
     auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
     player_rect_.setPosition(new_position);
-    if (server_accepted_connection_.load()) {
+    if (server_accepted_connection_.load() || true) {
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ClientUpdatePosition;
       msg << passport_ << new_position;
@@ -89,6 +89,7 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
 
   switch (server_msg.header.id) {
     case GameEventType::ServerApproveConnection: {
+      std::cout << "[CLIENT] Server approved connection. " << std::endl;
       server_msg >> passport_;
       server_accepted_connection_ = true;
       break;
@@ -98,6 +99,9 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       uint32_t other_player_id;
 
       server_msg >> other_player_position >> other_player_id;
+      std::cout << "[CLIENT] Received other player location: ("
+                << other_player_position.x << ": "
+                << other_player_position.y << ")" << std::endl;
       mutex_.lock();
       if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
         other_player_ptr->second.setPosition(other_player_position);
@@ -106,6 +110,7 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
         other_player.setSize(player_size);
         other_player.setOrigin(player_size/2.f);
         other_player.setPosition(other_player_position);
+        other_player.setFillColor(sf::Color::Cyan);
       }
       mutex_.unlock();
 

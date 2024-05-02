@@ -60,7 +60,7 @@ struct Message{
   void Serialize(std::vector<char>& buffer) const {
     size_t header_size = sizeof(header);
     buffer.resize(sizeof(header) + Size());
-    memcpy(buffer.data(), buffer.data(), header_size);
+    memcpy(buffer.data(), &header, header_size);
     memcpy(buffer.data() + header_size, body.data(), Size());
   }
 

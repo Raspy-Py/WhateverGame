@@ -29,15 +29,16 @@ WhateverServer::~WhateverServer() {
 
 void WhateverServer::OnReceive(Packet<GameEventType> packet) {
   auto endp = packet.endpoint;
-  std::cout << "[SERVER] Received greetings from: " << endp.address().to_string()
-            << ":" << endp.port() << std::endl;
 
   switch (packet.message->header.id){
     case GameEventType::ClientRequestConnect: {
+      std::cout << "[SERVER] Received connection request." << std::endl;
       uint32_t client_id = clients_map()[packet.endpoint];
       players_data_[client_id] = {}; // Initialize default player data structure
 
       // Send the client its passport id
+      std::cout << "[SERVER] Sending connection approval." << std::endl;
+
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ServerApproveConnection;
       msg << client_id;
@@ -52,17 +53,22 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       break;
     }
     case GameEventType::ClientUpdatePosition: {
+
       auto& msg = *(packet.message);
 
       PlayerInfo player_info;
       uint32_t client_id;
       msg >> player_info >> client_id;
+      std::cout << "[SERVER] Received client update position: ("
+                << player_info.x << "; "
+                << player_info.y << ") " << std::endl;
 
       players_data_[client_id] = player_info;
 
       // TODO: THIS IS SUPER STRANGE ASYNCHRONOUS TICKLESS APPROACH
       Message<GameEventType> server_msg;
       server_msg.header.id = GameEventType::ServerUpdateNetworkData;
+      std::cout << "[SERVER] Sending update position to other players." << std::endl;
       server_msg << client_id << player_info;
       SendToAllExcept(server_msg, client_id);
       break;

@@ -73,7 +73,7 @@ class UDPServer {
  private:
   void HandleSend(){
     Packet<T> packet;
-    out_queue_.TryPop(packet);
+    if (!out_queue_.TryPop(packet)) return;
     packet.message->Serialize(send_buffer_);
     socket_.async_send_to(
       asio::buffer(send_buffer_), packet.endpoint,

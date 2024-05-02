@@ -49,8 +49,7 @@ class Sniffer {
             StartReceive();  // Continue receiving
           } else if (!error) {
             StartReceive();
-          }
-          else{
+          } else {
             std::cerr << "[CLIENT] Sniffer error: " << error.message() << std::endl;
           }
         });
