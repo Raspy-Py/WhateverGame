@@ -101,7 +101,7 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       uint32_t other_player_id;
       float direction;
       sf::Vector2f position;
-      server_msg >> direction >>  position >> other_player_id;
+      server_msg >> direction >> position >> other_player_id;
       if (other_player_id == passport_) return;
       /*
       std::cout << "[CLIENT] Received other player location: ("

@@ -51,8 +51,9 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
     case GameEventType::ClientUpdatePosition: {
       auto& msg = *(packet.message);
       uint32_t client_id = 0;
+      float direction = 0.f;
       PlayerInfo player_info{};
-      msg >> player_info >> client_id;
+      msg >> direction >> player_info >> client_id;
       players_data_[client_id] = player_info;
 
       /*
@@ -67,7 +68,7 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       // TODO: THIS IS SUPER STRANGE ASYNCHRONOUS TICKLESS APPROACH
       Message<GameEventType> server_msg;
       server_msg.header.id = GameEventType::ServerUpdateNetworkData;
-      server_msg << client_id << player_info;
+      server_msg << client_id << player_info << direction;
       SendToAllExcept(server_msg, client_id);
       break;
     }
