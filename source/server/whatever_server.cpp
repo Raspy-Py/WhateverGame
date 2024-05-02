@@ -63,11 +63,13 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
                 << player_info.y << ") " << std::endl;
 
       players_data_[client_id] = player_info;
+      std::cout << "TOTAL PLAYERS: " << players_data_.size() << "\t [";
+      for (auto& [id, data] : players_data_) std::cout << id << ", ";
+      std::cout << "] " << std::endl;
 
       // TODO: THIS IS SUPER STRANGE ASYNCHRONOUS TICKLESS APPROACH
       Message<GameEventType> server_msg;
       server_msg.header.id = GameEventType::ServerUpdateNetworkData;
-      std::cout << "[SERVER] Sending update position to other players." << std::endl;
       server_msg << client_id << player_info;
       SendToAllExcept(server_msg, client_id);
       break;

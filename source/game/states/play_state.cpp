@@ -43,16 +43,19 @@ void PlayState::Update(float delta_time) {
         static_cast<float>(S - W)
     };
 
-    if (speed_vector.length() > 0.0f) speed_vector = speed_vector.normalized();
-
-    auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
-    player_rect_.setPosition(new_position);
-    if (server_accepted_connection_.load() || true) {
-      Message<GameEventType> msg;
-      msg.header.id = GameEventType::ClientUpdatePosition;
-      msg << passport_ << new_position;
-      networker->Send(msg);
+    if (speed_vector.length() > 0.0f) {
+      speed_vector = speed_vector.normalized();
+      auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
+      player_rect_.setPosition(new_position);
+      if (server_accepted_connection_.load() || true) {
+        Message<GameEventType> msg;
+        msg.header.id = GameEventType::ClientUpdatePosition;
+        msg << passport_ << new_position;
+        networker->Send(msg);
+      }
     }
+
+
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
     networker->StopServer();
@@ -99,9 +102,11 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       uint32_t other_player_id;
 
       server_msg >> other_player_position >> other_player_id;
+      /*
       std::cout << "[CLIENT] Received other player location: ("
                 << other_player_position.x << ": "
                 << other_player_position.y << ")" << std::endl;
+      */
       mutex_.lock();
       if (auto other_player_ptr = other_players_.find(other_player_id); other_player_ptr != other_players_.end()){
         other_player_ptr->second.setPosition(other_player_position);
