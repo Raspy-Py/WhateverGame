@@ -30,11 +30,10 @@ void PlayState::Update(float delta_time) {
       networker->Connect(server.host, server.port);
       text_.SetVisible(false);
     }
-  }else if(!server_accepted_connection_.load()){
+  }else if(!(server_accepted_connection_.load())){
     Message<GameEventType> msg;
     msg.header.id = GameEventType::ClientRequestConnect;
     networker->Send(msg);
-
   }else{
     static int A = 0, D = 0, W = 0, S = 0;
     A = std::min(1, int(input.IsKeyPressed(sfk::A)) + A) - input.IsKeyReleased(sfk::A);
@@ -79,6 +78,7 @@ void PlayState::Draw(sf::RenderWindow &window) {
   window.display();
 }
 void PlayState::OnEntry() {
+  server_accepted_connection_.store(false);
   auto &networker = GetContext()->network_manager;
   networker->SearchServers({8888, 8889, 8890}, 3);
   networker->SetOnReceiveHandler([this](std::shared_ptr<Message<GameEventType>> &&message) {
@@ -95,9 +95,9 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
 
   switch (server_msg.header.id) {
     case GameEventType::ServerApproveConnection: {
-      std::cout << "[CLIENT] Server approved connection. " << std::endl;
       server_msg >> passport_;
-      server_accepted_connection_ = true;
+      std::cout << "[CLIENT] Server approved connection. Your ID: " << passport_ << std::endl;
+      server_accepted_connection_.store(true);
       break;
     }
     case GameEventType::ServerUpdateNetworkData: {

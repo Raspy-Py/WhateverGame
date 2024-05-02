@@ -28,14 +28,13 @@ WhateverServer::~WhateverServer() {
 }
 
 void WhateverServer::OnReceive(Packet<GameEventType> packet) {
-  auto endp = packet.endpoint;
-
   switch (packet.message->header.id){
     case GameEventType::ClientRequestConnect: {
-      std::cout << "[SERVER] Received connection request." << std::endl;
-      uint32_t client_id = clients_map()[packet.endpoint.address()].id;
-      players_data_[client_id] = {}; // Initialize default player data structure
 
+      uint32_t client_id = clients_map()[packet.endpoint.address()].id;
+      auto [it, inserted] = players_data_.try_emplace(client_id);
+      if (inserted) players_data_[client_id] = {};
+      std::cout << "[SERVER] Received connection request from client: " << client_id << std::endl;
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ServerApproveConnection;
       msg << client_id;
