@@ -36,9 +36,6 @@ void WhateverServer::OnReceive(Packet<GameEventType> packet) {
       uint32_t client_id = clients_map()[packet.endpoint.address()].id;
       players_data_[client_id] = {}; // Initialize default player data structure
 
-      // Send the client its passport id
-      std::cout << "[SERVER] Sending connection approval." << std::endl;
-
       Message<GameEventType> msg;
       msg.header.id = GameEventType::ServerApproveConnection;
       msg << client_id;

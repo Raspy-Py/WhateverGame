@@ -56,6 +56,7 @@ class UDPServer {
       endpoint,
       std::make_shared<Message<T>>(msg)
     });
+    HandleSend();
   }
 
   void SendToAllExcept(const Message<T>& msg, uint32_t ignore_id = -1){
@@ -80,6 +81,7 @@ class UDPServer {
     Packet<T> packet;
     if (!out_queue_.TryPop(packet)) return;
     packet.message->Serialize(send_buffer_);
+    std::cout << "SENDING APROVAL TO " << packet.endpoint.address().to_string() << std::endl;
     socket_.async_send_to(
       asio::buffer(send_buffer_), packet.endpoint,
       [this](const asio::error_code& ec, std::size_t bytes_sent){

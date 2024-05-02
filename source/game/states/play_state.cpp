@@ -26,15 +26,16 @@ void PlayState::Update(float delta_time) {
   if (text_.GetVisible()) {
     auto servers = networker->GetAvailableServer();
     if (!servers.empty()){
-      text_.SetVisible(false);
       ServerAddress server = servers[0];
       networker->Connect(server.host, server.port);
-
-      Message<GameEventType> msg;
-      msg.header.id = GameEventType::ClientRequestConnect;
-      networker->Send(msg);
+      text_.SetVisible(false);
     }
-  }else {
+  }else if(!server_accepted_connection_.load()){
+    Message<GameEventType> msg;
+    msg.header.id = GameEventType::ClientRequestConnect;
+    networker->Send(msg);
+
+  }else{
     static int A = 0, D = 0, W = 0, S = 0;
     A = std::min(1, int(input.IsKeyPressed(sfk::A)) + A) - input.IsKeyReleased(sfk::A);
     D = std::min(1, int(input.IsKeyPressed(sfk::D)) + D) - input.IsKeyReleased(sfk::D);
@@ -51,12 +52,10 @@ void PlayState::Update(float delta_time) {
       speed_vector = speed_vector.normalized();
       auto new_position = player_rect_.getPosition() + speed_vector * delta_time * 1000.f;
       player_rect_.setPosition(new_position);
-      if (server_accepted_connection_.load()) {
-        Message<GameEventType> msg;
-        msg.header.id = GameEventType::ClientUpdatePosition;
-        msg << passport_ << new_position;
-        networker->Send(msg);
-      }
+      Message<GameEventType> msg;
+      msg.header.id = GameEventType::ClientUpdatePosition;
+      msg << passport_ << new_position;
+      networker->Send(msg);
     }
 
 
