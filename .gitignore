@@ -488,3 +488,5 @@ MigrationBackup/
 .vscode
 include/
 lib/
+/share/
+/share/

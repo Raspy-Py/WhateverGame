@@ -39,3 +39,18 @@ void Player::Animate() {
   sprite_.setPosition(position_);
 }
 
+bool Player::Intersect(const Player &other, float distance) {
+
+  sf::Vector2f new_position_ = {
+      std::cos(direction_) * speed_ * distance,
+      std::sin(direction_) * speed_ * distance
+  };
+  new_position_ += position_;
+  sprite_.setPosition(new_position_);
+  if ( sprite_.getGlobalBounds().findIntersection( other.sprite_.getGlobalBounds() ) ) {
+    return true;
+  }
+  sprite_.setPosition(position_);
+
+  return false;
+}

@@ -20,6 +20,8 @@ class Player {
   void SetDirection(float direction) { direction_ = direction; Animate(); }
   void SetPosition(const sf::Vector2f& position) {position_ = position; Animate(); }
 
+  bool Intersect(const Player& other, float distance);
+
  private:
   sf::Sprite sprite_;
   sf::Texture &texture_;

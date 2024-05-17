@@ -15,6 +15,12 @@ PlayState::PlayState(std::shared_ptr<Context> context)
   text_ = std::move(Text(font, "Searching for server...", {400.f, 300.f}));
   text_.SetVisible(true);
 
+
+  // fake player to test collision
+  auto& other_player = other_players_[5];
+  other_player = std::make_unique<Player>(player_texture, player_size);
+  other_player->SetPosition({400, 400});
+
   kill_server_btn_ = std::move(Button(font, "Kill Server", {{10.f,540.f}, {300.f,50.f}}));
 }
 
@@ -45,14 +51,27 @@ void PlayState::Update(float delta_time) {
 
     if (translation != 0 || rotation != 0) {
       player_->Rotate(rotation * delta_time);
-      player_->Move(translation * delta_time);
-      auto pos = player_->GetPosition();
-      auto dir = player_->GetDirection();
-      std::cout << "Position: (" << pos.x << "; " << pos.y << ") dir: " << dir << std::endl;
-      Message<GameEventType> msg;
-      msg.header.id = GameEventType::ClientUpdatePosition;
-      msg << passport_ << player_->GetPosition() << player_->GetDirection();
-      networker->Send(msg);
+
+      bool move_flag = true;
+
+      for ( const auto& [_, other_pl] : other_players_ ) {
+        if ( player_->Intersect(*other_pl, translation * delta_time) ) {
+          move_flag = false;
+          break;
+        }
+      }
+
+      if ( move_flag ) {
+        player_->Move(translation * delta_time);
+        auto pos = player_->GetPosition();
+        auto dir = player_->GetDirection();
+        std::cout << "Position: (" << pos.x << "; " << pos.y << ") dir: " << dir << std::endl;
+        Message<GameEventType> msg;
+        msg.header.id = GameEventType::ClientUpdatePosition;
+        msg << passport_ << player_->GetPosition() << player_->GetDirection();
+        networker->Send(msg);
+      }
+
     }
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
