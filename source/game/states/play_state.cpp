@@ -3,9 +3,11 @@
 
 #include "engine/engine_common.h"
 
+
+
 PlayState::PlayState(std::shared_ptr<Context> context)
   : GameState(std::move(context)),
-    passport_(0) {
+    passport_(0), background_(ResourceManager::GetInstance().GetTexture("bg")) {
 
   auto& resource_manager = ResourceManager::GetInstance();
   auto& font = resource_manager.GetFont("gothic");
@@ -16,12 +18,19 @@ PlayState::PlayState(std::shared_ptr<Context> context)
   text_.SetVisible(true);
 
 
-  // fake player to test collision
+//   fake player to test collision
   auto& other_player = other_players_[5];
   other_player = std::make_unique<Player>(player_texture, player_size);
   other_player->SetPosition({400, 400});
+  objects_.push_back(std::move(other_player));
+
 
   kill_server_btn_ = std::move(Button(font, "Kill Server", {{10.f,540.f}, {300.f,50.f}}));
+  auto& wall_texture = resource_manager.GetTexture("wall");
+
+  // TODO: generate walls for host and send other players
+  GenerateWalls(wall_texture, objects_, 4);
+
 }
 
 void PlayState::Update(float delta_time) {
@@ -40,28 +49,35 @@ void PlayState::Update(float delta_time) {
     msg.header.id = GameEventType::ClientRequestConnect;
     networker->Send(msg);
   }else{
+
     static int A = 0, D = 0, W = 0, S = 0;
+    static float min_intersection = 0.0f;
     A = std::min(1, int(input.IsKeyPressed(sfk::A)) + A) - input.IsKeyReleased(sfk::A);
     D = std::min(1, int(input.IsKeyPressed(sfk::D)) + D) - input.IsKeyReleased(sfk::D);
     W = std::min(1, int(input.IsKeyPressed(sfk::W)) + W) - input.IsKeyReleased(sfk::W);
     S = std::min(1, int(input.IsKeyPressed(sfk::S)) + S) - input.IsKeyReleased(sfk::S);
+    auto rotation = static_cast<float>(D - A);
+    auto translation = static_cast<float>(S - W);
 
-    float rotation = static_cast<float>(D - A);
-    float translation = static_cast<float>(S - W);
 
     if (translation != 0 || rotation != 0) {
+      bool collision_flag = false;
+
       player_->Rotate(rotation * delta_time);
 
-      bool move_flag = true;
 
-      for ( const auto& [_, other_pl] : other_players_ ) {
-        if ( player_->Intersect(*other_pl, translation * delta_time) ) {
-          move_flag = false;
-          break;
+      float curr_min_intersection = 50000.0f;
+      for ( const auto& w: objects_ ) {
+        auto curr_intersection = player_->Intersect(*w, translation * delta_time);
+        if ( curr_intersection > 10 && curr_min_intersection > curr_intersection) {
+          curr_min_intersection = curr_intersection;
+          collision_flag = true;
+//          std::cout << "collision size: " << curr_min_intersection << std::endl;
         }
       }
 
-      if ( move_flag ) {
+
+      if ( (curr_min_intersection < min_intersection) || !collision_flag ) {
         player_->Move(translation * delta_time);
         auto pos = player_->GetPosition();
         auto dir = player_->GetDirection();
@@ -72,6 +88,8 @@ void PlayState::Update(float delta_time) {
         networker->Send(msg);
       }
 
+      if(collision_flag) min_intersection = curr_min_intersection;
+      else min_intersection = 0;
     }
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
@@ -81,12 +99,14 @@ void PlayState::Update(float delta_time) {
 
 void PlayState::Draw(sf::RenderWindow &window) {
   window.clear(sf::Color::Black);
+  window.draw(background_);
 
   if (text_.GetVisible()) text_.Draw(window);
   else {
     player_->Draw(window);
-    for (auto& [id, player] : other_players_)
-      player->Draw(window);
+
+    for ( const auto & w: objects_)
+      w->Draw(window);
   }
 
   kill_server_btn_.Draw(window);
@@ -140,6 +160,7 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
         auto& resource_manager = ResourceManager::GetInstance();
         auto& player_texture = resource_manager.GetTexture("enemy_tank");
         other_player = std::make_unique<Player>(player_texture, player_size);
+        objects_.push_back(std::move(other_player));
       }
       mutex_.unlock();
 
@@ -149,5 +170,60 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       break;
     }
     default: break;
+  }
+}
+
+
+float RandomFloat(float min, float max) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(min * 10000, max * 10000);
+  return dis(gen) / 10000.0f;
+}
+
+sf::Vector2f RandomSize(float minSize, float maxSize) {
+  return {RandomFloat(minSize, maxSize), RandomFloat(minSize, maxSize)* 4.0f};
+}
+
+sf::Vector2f RandomPosition(float minX, float minY, float maxX, float maxY) {
+  return {RandomFloat(minX, maxX), RandomFloat(minY, maxY)};
+}
+
+float RandomDirection() {
+  return RandomFloat(0.0f, 3.14159f);
+}
+
+bool CheckIntersection(const Wall &newWall, const std::vector<std::unique_ptr<GameObject>> &existingWalls) {
+  for (const auto &wall : existingWalls) {
+    if (newWall.GetSprite().getGlobalBounds().findIntersection(wall->GetSprite().getGlobalBounds())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void GenerateWalls(sf::Texture &wall_texture, std::vector<std::unique_ptr<GameObject>> &objects, size_t count) {
+  const float minSize = 10.f;
+  const float maxSize = 50.f;
+  const float minX = 0.f;
+  const float minY = 0.f;
+  const float maxX = 800.f;
+  const float maxY = 600.f;
+
+  for (size_t i = 0; i < count; ++i) {
+    bool validWall = false;
+    Wall newWall(wall_texture, RandomSize(minSize, maxSize));
+
+    while (!validWall) {
+      newWall.SetPosition(RandomPosition(minX, minY, maxX, maxY));
+      newWall.SetDirection(RandomDirection());
+      newWall.Animate();
+
+      if (!CheckIntersection(newWall, objects)) {
+        validWall = true;
+      }
+    }
+
+    objects.push_back(std::make_unique<Wall>(std::move(newWall)));
   }
 }

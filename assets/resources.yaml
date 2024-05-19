@@ -7,8 +7,10 @@ fonts:
   poppins: "../assets/fonts/Poppins-Regular.ttf"
 
 textures:
-  sviat: "../assets/textures/test.png"
+  wall: "../assets/textures/wall.png"
   tank: "../assets/textures/blue_default.png"
   enemy_tank: "../assets/textures/red_default.png"
+  bg: "../assets/textures/field.png"
+
 
 

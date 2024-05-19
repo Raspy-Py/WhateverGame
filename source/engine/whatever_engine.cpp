@@ -4,7 +4,8 @@
 
 WhateverEngine::WhateverEngine(){
   context_ = std::make_shared<Context>();
-  context_->window->create(sf::VideoMode(sf::Vector2u(800, 600)), "WhateverGame", sf::Style::Titlebar | sf::Style::Close);
+  context_->window->create(sf::VideoMode(sf::Vector2u(800, 600)), "WhateverGame",
+                           sf::Style::Titlebar | sf::Style::Close);
   context_->state_manager->PushState(CreateEntryState(context_));
 }
 
