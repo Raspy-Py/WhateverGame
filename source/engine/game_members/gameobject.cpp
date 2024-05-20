@@ -28,22 +28,13 @@ void GameObject::SetPosition(const sf::Vector2f& position) {
   Animate();
 }
 
-float GameObject::Intersect(const GameObject& other, float distance) {
-  sf::Vector2f new_position_ = {
-      std::cos(direction_) * speed_ * distance,
-      std::sin(direction_) * speed_ * distance
-  };
-
-  new_position_ += position_;
-  sprite_.setPosition(new_position_);
-
-  if ( sprite_.getGlobalBounds().findIntersection( other.GetSprite().getGlobalBounds()).has_value() ) {
-    auto intersection = *sprite_.getGlobalBounds().findIntersection( other.GetSprite().getGlobalBounds() );
-    return intersection.getSize().x * intersection.getSize().y;
+bool GameObject::Intersect(const GameObject& other) {
+  auto intersection = sprite_.getGlobalBounds().findIntersection
+      ( other.GetSprite().getGlobalBounds());
+  if (intersection.has_value()) {
+    return intersection->width * intersection->height >10;
   }
-  sprite_.setPosition(position_);
-
-  return 0.0f;
+  return false;
 }
 
 void GameObject::Animate() {

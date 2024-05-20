@@ -20,7 +20,7 @@ class GameObject {
 
   sf::Sprite GetSprite() const { return sprite_; }
 
-  float Intersect(const GameObject& other, float distance);
+  bool Intersect(const GameObject& other);
 
  protected:
   sf::Sprite sprite_;

@@ -29,7 +29,7 @@ PlayState::PlayState(std::shared_ptr<Context> context)
   auto& wall_texture = resource_manager.GetTexture("wall");
 
   // TODO: generate walls for host and send other players
-  GenerateWalls(wall_texture, objects_, 4);
+  GenerateWalls(wall_texture, objects_, 6);
 
 }
 
@@ -51,7 +51,6 @@ void PlayState::Update(float delta_time) {
   }else{
 
     static int A = 0, D = 0, W = 0, S = 0;
-    static float min_intersection = 0.0f;
     A = std::min(1, int(input.IsKeyPressed(sfk::A)) + A) - input.IsKeyReleased(sfk::A);
     D = std::min(1, int(input.IsKeyPressed(sfk::D)) + D) - input.IsKeyReleased(sfk::D);
     W = std::min(1, int(input.IsKeyPressed(sfk::W)) + W) - input.IsKeyReleased(sfk::W);
@@ -63,22 +62,24 @@ void PlayState::Update(float delta_time) {
     if (translation != 0 || rotation != 0) {
       bool collision_flag = false;
 
+
+
+      player_->Move(translation * delta_time);
       player_->Rotate(rotation * delta_time);
-
-
-      float curr_min_intersection = 50000.0f;
       for ( const auto& w: objects_ ) {
-        auto curr_intersection = player_->Intersect(*w, translation * delta_time);
-        if ( curr_intersection > 10 && curr_min_intersection > curr_intersection) {
-          curr_min_intersection = curr_intersection;
+        if ( player_->Intersect(*w)) {
           collision_flag = true;
-//          std::cout << "collision size: " << curr_min_intersection << std::endl;
+          break;
         }
       }
 
 
-      if ( (curr_min_intersection < min_intersection) || !collision_flag ) {
-        player_->Move(translation * delta_time);
+      if ( collision_flag ) {
+
+        player_->Move(-translation * delta_time);
+        player_->Rotate(-rotation * delta_time);
+
+      } else {
         auto pos = player_->GetPosition();
         auto dir = player_->GetDirection();
         std::cout << "Position: (" << pos.x << "; " << pos.y << ") dir: " << dir << std::endl;
@@ -88,8 +89,7 @@ void PlayState::Update(float delta_time) {
         networker->Send(msg);
       }
 
-      if(collision_flag) min_intersection = curr_min_intersection;
-      else min_intersection = 0;
+
     }
   }
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
@@ -182,16 +182,14 @@ float RandomFloat(float min, float max) {
 }
 
 sf::Vector2f RandomSize(float minSize, float maxSize) {
-  return {RandomFloat(minSize, maxSize), RandomFloat(minSize, maxSize)* 4.0f};
+  return {RandomFloat(minSize, maxSize)*5.0f, RandomFloat(minSize, maxSize)};
 }
 
 sf::Vector2f RandomPosition(float minX, float minY, float maxX, float maxY) {
   return {RandomFloat(minX, maxX), RandomFloat(minY, maxY)};
 }
 
-float RandomDirection() {
-  return RandomFloat(0.0f, 3.14159f);
-}
+
 
 bool CheckIntersection(const Wall &newWall, const std::vector<std::unique_ptr<GameObject>> &existingWalls) {
   for (const auto &wall : existingWalls) {
@@ -216,7 +214,6 @@ void GenerateWalls(sf::Texture &wall_texture, std::vector<std::unique_ptr<GameOb
 
     while (!validWall) {
       newWall.SetPosition(RandomPosition(minX, minY, maxX, maxY));
-      newWall.SetDirection(RandomDirection());
       newWall.Animate();
 
       if (!CheckIntersection(newWall, objects)) {
