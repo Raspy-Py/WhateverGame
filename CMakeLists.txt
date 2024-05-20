@@ -79,7 +79,9 @@ file(GLOB_RECURSE SERVER_SOURCES source/server/*.cpp)
 #! Project main executable source compilation
 add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES}
         source/game/states/temp_gui.h
-        source/engine/utils.cpp)
+        source/engine/utils.cpp
+        source/engine/game_members/projectile.cpp
+        source/engine/game_members/projectile.h)
 add_executable(${SERVER_NAME} ${SERVER_SOURCES})
 
 # For consistency

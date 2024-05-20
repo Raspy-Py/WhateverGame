@@ -10,8 +10,11 @@ PlayState::PlayState(std::shared_ptr<Context> context)
   auto& resource_manager = ResourceManager::GetInstance();
   auto& font = resource_manager.GetFont("gothic");
   auto& player_texture = resource_manager.GetTexture("tank");
+  auto& projectile_texture = resource_manager.GetTexture("projectile");
+  auto& fire_texture = resource_manager.GetTexture("firing_tank");
+  auto& dead_texture = resource_manager.GetTexture("dead_tank");
 
-  player_ = std::make_unique<Player>(player_texture, player_size);
+  player_ = std::make_unique<Player>(player_texture,dead_texture, projectile_texture,player_size );
   text_ = std::move(Text(font, "Searching for server...", {400.f, 300.f}));
   text_.SetVisible(true);
 
@@ -19,9 +22,11 @@ PlayState::PlayState(std::shared_ptr<Context> context)
 }
 
 void PlayState::Update(float delta_time) {
+  if (!player_->isAlive())  return;
   using sfk = sf::Keyboard::Key;
   auto& input = GetInputManager();
   auto &networker = GetContext()->network_manager;
+
   if (text_.GetVisible()) {
     auto servers = networker->GetAvailableServer();
     if (!servers.empty()){
@@ -54,7 +59,22 @@ void PlayState::Update(float delta_time) {
       msg << passport_ << player_->GetPosition() << player_->GetDirection();
       networker->Send(msg);
     }
+
+    if (input.IsKeyPressed(sfk::Space)) {
+      player_->Shoot(600);
+    }
+    player_->UpdateProjectiles(delta_time);
   }
+
+  for (auto& [id, other_player] : other_players_) {
+    other_player->CheckProjectileCollisions(player_->GetProjectiles());
+    if (!other_player->isAlive()) continue;
+  }
+
+  for (auto& [id, other_player] : other_players_) {
+    player_->CheckProjectileCollisions(other_player->GetProjectiles());
+  }
+
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
     networker->StopServer();
   }
@@ -62,17 +82,21 @@ void PlayState::Update(float delta_time) {
 
 void PlayState::Draw(sf::RenderWindow &window) {
   window.clear(sf::Color::Black);
-
-  if (text_.GetVisible()) text_.Draw(window);
-  else {
+  if (text_.GetVisible()) {
+    text_.Draw(window);
+  } else {
     player_->Draw(window);
-    for (auto& [id, player] : other_players_)
-      player->Draw(window);
+    player_->DrawProjectiles(window);
+    for (auto& [id, other_player] : other_players_) {
+      other_player->Draw(window);
+      other_player->DrawProjectiles(window);
+    }
   }
-
   kill_server_btn_.Draw(window);
   window.display();
 }
+
+
 void PlayState::OnEntry() {
   server_accepted_connection_.store(false);
   auto &networker = GetContext()->network_manager;
@@ -120,7 +144,10 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
         auto& other_player = other_players_[other_player_id];
         auto& resource_manager = ResourceManager::GetInstance();
         auto& player_texture = resource_manager.GetTexture("enemy_tank");
-        other_player = std::make_unique<Player>(player_texture, player_size);
+        auto& projectile_texture = resource_manager.GetTexture("projectile");
+        auto& firing_texture = resource_manager.GetTexture("firing_enemy_tank");
+        auto& dead_texture = resource_manager.GetTexture("dead_tank");
+        other_player = std::make_unique<Player>(player_texture, dead_texture, projectile_texture, player_size);
       }
       mutex_.unlock();
 
