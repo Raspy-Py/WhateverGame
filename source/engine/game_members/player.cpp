@@ -1,7 +1,15 @@
 #include "player.h"
 
 
-Player::Player(sf::Texture& texture, sf::Vector2f size ): GameObject(texture, size) {}
+Player::Player(sf::Texture& texture, sf::Texture& projectile_texture, sf::Vector2f size)
+    : GameObject(texture, size), projectile_texture_(projectile_texture) {
+
+  sprite_.setOrigin({sprite_.getLocalBounds().width / 2,
+                     sprite_.getLocalBounds().height / 2});
+  sprite_.setScale({size.x / sprite_.getLocalBounds().width,
+                    size.y / sprite_.getLocalBounds().height});
+  sprite_.setPosition(position_);
+}
 
 
 void Player::Move(float distance) {
@@ -9,7 +17,6 @@ void Player::Move(float distance) {
     std::cos(direction_) * speed_ * distance,
     std::sin(direction_) * speed_ * distance
   };
-
   Animate();
 }
 
@@ -23,38 +30,28 @@ void Player::Rotate(float radians){
 
 void Player::Shoot(float speed) {
   sf::Vector2f barrel_position = position_ - sf::Vector2f{std::cos(direction_),
-                                                          std::sin(direction_)} * player_size_.x;
-  Projectile newProjectile(projectile_texture_, barrel_position, direction_, speed);
-  projectiles_.push_back(newProjectile);
+                                                          std::sin(direction_)} * object_size_.x;
+    projectiles_.push_back(std::make_unique<Projectile>(projectile_texture_, barrel_position, direction_, speed));
   std::cout << "Shooting!" << std::endl;
   std::cout << "projectiles size: " << projectiles_.size() << std::endl;
 }
 
-void Player::Update(float dt) {
+void Player::Update(float dt, const std::vector<std::unique_ptr<GameObject>>& objects) {
   for (auto& proj : projectiles_) {
-    proj.Update(dt);
+    if (proj->isExpired()) continue;
+    proj->Update(dt, objects);
   }
+    projectiles_.erase(std::remove_if(projectiles_.begin(), projectiles_.end(),
+                                        [](const auto& proj) { return proj->isExpired(); }),
+                        projectiles_.end());
 }
 
-void Player::UpdateProjectiles(float dt) {
-  for (auto& proj : projectiles_) {
-    proj.Update(dt);
-  }
-  projectiles_.erase(std::remove_if(projectiles_.begin(), projectiles_.end(),
-                                    [](const Projectile& p) { return p.isExpired(); }), projectiles_.end());
-}
 
-void Player::DrawProjectiles(sf::RenderWindow &window) {
-  for (auto& proj : projectiles_) {
-    proj.Draw(window);
-  }
-}
-
-void Player::CheckProjectileCollisions(const std::vector<Projectile>& projectiles) {
-  for (const auto& projectile : projectiles) {
-    if (projectile.checkCollision(sprite_)) {
-      Die(dead_texture_);
-      break;
+void Player::Draw(sf::RenderWindow &window) const {
+  window.draw(sprite_);
+  for (const auto& proj : projectiles_) {
+    if (!proj->isExpired()) {
+      window.draw(proj->GetSprite());
     }
   }
 }

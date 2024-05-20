@@ -3,6 +3,7 @@
 
 #include "engine/engine_common.h"
 
+
 PlayState::PlayState(std::shared_ptr<Context> context)
   : GameState(std::move(context)),
     passport_(0), background_(ResourceManager::GetInstance().GetTexture("bg")) {
@@ -14,7 +15,7 @@ PlayState::PlayState(std::shared_ptr<Context> context)
   auto& fire_texture = resource_manager.GetTexture("firing_tank");
   auto& dead_texture = resource_manager.GetTexture("dead_tank");
 
-  player_ = std::make_unique<Player>(player_texture,dead_texture, projectile_texture,player_size );
+  player_ = std::make_unique<Player>(player_texture,projectile_texture,player_size );
   text_ = std::move(Text(font, "Searching for server...", {400.f, 300.f}));
   text_.SetVisible(true);
 
@@ -50,10 +51,6 @@ void PlayState::Update(float delta_time) {
     S = std::min(1, int(input.IsKeyPressed(sfk::S)) + S) - input.IsKeyReleased(sfk::S);
     auto rotation = static_cast<float>(D - A);
     auto translation = static_cast<float>(S - W);
-
-    float rotation = static_cast<float>(D - A);
-    float translation = static_cast<float>(S - W);
-
     if (translation != 0 || rotation != 0) {
       bool collision_flag = false;
 
@@ -73,7 +70,7 @@ void PlayState::Update(float delta_time) {
 
         player_->Move(-translation * delta_time);
         player_->Rotate(-rotation * delta_time);
-
+        std::cout << "Collision detected!" << std::endl;
       } else {
         auto pos = player_->GetPosition();
         auto dir = player_->GetDirection();
@@ -90,16 +87,9 @@ void PlayState::Update(float delta_time) {
     if (input.IsKeyPressed(sfk::Space)) {
       player_->Shoot(600);
     }
-    player_->UpdateProjectiles(delta_time);
-  }
 
-  for (auto& [id, other_player] : other_players_) {
-    other_player->CheckProjectileCollisions(player_->GetProjectiles());
-    if (!other_player->isAlive()) continue;
-  }
+    player_->Update(delta_time, objects_);
 
-  for (auto& [id, other_player] : other_players_) {
-    player_->CheckProjectileCollisions(other_player->GetProjectiles());
   }
 
   if (input.IsLeftButtonPressed() && kill_server_btn_.Contains(input.GetMousePosition())){
@@ -169,12 +159,9 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
         auto& other_player = other_players_[other_player_id];
         auto& resource_manager = ResourceManager::GetInstance();
         auto& player_texture = resource_manager.GetTexture("enemy_tank");
-        other_player = std::make_unique<Player>(player_texture, player_size);
-        objects_.push_back(std::move(other_player));
         auto& projectile_texture = resource_manager.GetTexture("projectile");
-        auto& firing_texture = resource_manager.GetTexture("firing_enemy_tank");
-        auto& dead_texture = resource_manager.GetTexture("dead_tank");
-        other_player = std::make_unique<Player>(player_texture, dead_texture, projectile_texture, player_size);
+        other_player = std::make_unique<Player>(player_texture, projectile_texture, player_size);
+        objects_.push_back(std::move(other_player));
       }
       mutex_.unlock();
 
@@ -184,5 +171,57 @@ void PlayState::OnReceiveHandler(std::shared_ptr<Message<GameEventType>> &&messa
       break;
     }
     default: break;
+  }
+}
+
+
+float RandomFloat(float min, float max) {
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> dis(min * 10000, max * 10000);
+  return dis(gen) / 10000.0f;
+}
+
+sf::Vector2f RandomSize(float minSize, float maxSize) {
+  return {RandomFloat(minSize, maxSize)*5.0f, RandomFloat(minSize, maxSize)};
+}
+
+sf::Vector2f RandomPosition(float minX, float minY, float maxX, float maxY) {
+  return {RandomFloat(minX, maxX), RandomFloat(minY, maxY)};
+}
+
+
+
+bool CheckIntersection(const Wall &newWall, const std::vector<std::unique_ptr<GameObject>> &existingWalls) {
+  for (const auto &wall : existingWalls) {
+    if (newWall.GetSprite().getGlobalBounds().findIntersection(wall->GetSprite().getGlobalBounds())) {
+      return true;
+    }
+  }
+  return false;
+}
+
+void GenerateWalls(sf::Texture &wall_texture, std::vector<std::unique_ptr<GameObject>> &objects, size_t count) {
+  const float minSize = 10.f;
+  const float maxSize = 50.f;
+  const float minX = 0.f;
+  const float minY = 0.f;
+  const float maxX = 800.f;
+  const float maxY = 600.f;
+
+  for (size_t i = 0; i < count; ++i) {
+    bool validWall = false;
+    Wall newWall(wall_texture, RandomSize(minSize, maxSize));
+
+    while (!validWall) {
+      newWall.SetPosition(RandomPosition(minX, minY, maxX, maxY));
+      newWall.Animate();
+
+      if (!CheckIntersection(newWall, objects)) {
+        validWall = true;
+      }
+    }
+
+    objects.push_back(std::make_unique<Wall>(std::move(newWall)));
   }
 }

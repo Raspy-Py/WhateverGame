@@ -17,6 +17,7 @@ class GameObject {
   float GetDirection() const { return direction_; }
   void SetDirection(float direction);
   void SetPosition(const sf::Vector2f& position);
+  void SetSpeed(float speed) { speed_ = speed; }
 
   sf::Sprite GetSprite() const { return sprite_; }
 
