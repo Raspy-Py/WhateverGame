@@ -12,5 +12,9 @@ textures:
   enemy_tank: "../assets/textures/red_default.png"
   bg: "../assets/textures/field.png"
 
+  firing_tank: "../assets/textures/blue_firing.png"
+  firing_enemy_tank: "../assets/textures/red_firing.png"
+  dead_tank: "../assets/textures/dead.png"
+  projectile: "../assets/textures/projectile.png"
 
 
