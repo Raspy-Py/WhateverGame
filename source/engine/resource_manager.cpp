@@ -1,18 +1,26 @@
-#include <iostream>
 #include "resource_manager.h"
-#include "caches/texture_cache.hpp"
-#include "caches/font_cache.hpp"
 
-TextureCache ResourceManager::texture_cache_;
-FontCache ResourceManager::font_cache_;
+#include "yaml-cpp/yaml.h"
+#include "utils.h"
 
-sf::Font ResourceManager::GetFont(const std::string& file_name){
-  std::cout << "Getting font: " << file_name << std::endl;
-  return font_cache_.GetFont(file_name);
+void ResourceManager::LoadResourceMap(const std::string &resources) {
+  YAML::Node mapping = YAML::LoadFile(resources);
+
+  for (auto resource_group : mapping){
+    for (auto resource : resource_group.second) {
+      auto name = resource.first.as<std::string>();
+      auto file = resource.second.as<std::string>();
+      file_map_[name] = file;
+    }
+  }
+
+  font_map_.clear();
+  texture_map_.clear();
 }
 
-sf::Texture ResourceManager::GetTexture(const std::string& file_name){
-  std::cout << "Getting texture: " << file_name << std::endl;
-  return texture_cache_.GetTexture(file_name);
+ResourceManager& ResourceManager::GetInstance() {
+  static std::mutex mutex;
+  std::lock_guard<std::mutex> lock(mutex);
+  static ResourceManager instance;
+  return instance;
 }
-

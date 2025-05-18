@@ -7,3 +7,6 @@
 [submodule "vendor/tiny-process-library"]
 	path = vendor/tiny-process-library
 	url = https://gitlab.com/eidheim/tiny-process-library.git
+[submodule "vendor/yaml-cpp"]
+	path = vendor/yaml-cpp
+	url = https://github.com/jbeder/yaml-cpp.git

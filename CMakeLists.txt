@@ -5,9 +5,10 @@ cmake_minimum_required(VERSION 3.15)
 #! CHANGE YOUR PROJECT NAME
 #  It is used as your project's main executable name.
 set(PROJECT_NAME WhateverGame)
+set(SERVER_NAME WhateverServer)
 project(${PROJECT_NAME} C CXX) # project(${PROJECT_NAME} C CXX ASM)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 ##########################################################
@@ -72,19 +73,33 @@ add_definitions(-DASIO_STANDALONE)
 ##########################################################
 
 
-file(GLOB_RECURSE SOURCES source/*.cpp)
+file(GLOB_RECURSE GAME_SOURCES source/game/*.cpp)
+file(GLOB_RECURSE ENGINE_SOURCES source/engine/*.cpp)
+file(GLOB_RECURSE SERVER_SOURCES source/server/*.cpp)
 #! Project main executable source compilation
-add_executable(${PROJECT_NAME} ${SOURCES})
+add_executable(${PROJECT_NAME} ${GAME_SOURCES} ${ENGINE_SOURCES}
+        source/game/states/temp_gui.h
+        source/engine/utils.cpp
+        source/engine/game_members/projectile.cpp
+        source/engine/game_members/projectile.h)
+add_executable(${SERVER_NAME} ${SERVER_SOURCES})
 
 # For consistency
 include_directories(${PROJECT_NAME} source)
+include_directories(${SERVER_NAME} source)
 
+
+########
+# YAML #
+########
+add_subdirectory(vendor/yaml-cpp)
+target_link_libraries(${PROJECT_NAME} PRIVATE yaml-cpp::yaml-cpp)
+include_directories(${PROJECT_NAME} vendor/yaml-cpp/include)
 
 ########
 # SFML #
 ########
 add_subdirectory(vendor/sfml)
-# Link library to SFML privately.
 target_link_libraries(${PROJECT_NAME} PRIVATE sfml-graphics sfml-system sfml-window)
 include_directories(${PROJECT_NAME} vendor/sfml/include)
 
@@ -92,8 +107,7 @@ include_directories(${PROJECT_NAME} vendor/sfml/include)
 # Asio #
 ########
 include_directories(${PROJECT_NAME} vendor/asio/asio/include)
-#include_directories(Server vendor/asio/asio/include)
-#include_directories(Client vendor/asio/asio/include)
+include_directories(${SERVER_NAME} vendor/asio/asio/include)
 
 ########################
 # Tine process library #
@@ -102,22 +116,18 @@ add_subdirectory(vendor/tiny-process-library)
 target_link_libraries(${PROJECT_NAME} PRIVATE tiny-process-library)
 include_directories(${PROJECT_NAME} vendor/tiny-process-library)
 
-#target_link_libraries(Client PRIVATE tiny-process-library)
-#include_directories(Client vendor/tiny-process-library)
 
 ##########################################################
 # Fixed CMakeLists.txt part
 ##########################################################
 
 INSTALL(PROGRAMS
-        $<TARGET_FILE:${PROJECT_NAME}> # ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}
-        #$<TARGET_FILE:Server>
-        #<TARGET_FILE:Client>
+        $<TARGET_FILE:${PROJECT_NAME}>
+        $<TARGET_FILE:${SERVER_NAME}>
         DESTINATION bin)
 
 # Define ALL_TARGETS variable to use in PVS and Sanitizers
-set(ALL_TARGETS ${PROJECT_NAME})
-#set(ALL_TARGETS Server Client)
+set(ALL_TARGETS ${PROJECT_NAME} ${SERVER_NAME})
 
 # Include CMake setup
 include(cmake/main-config.cmake)

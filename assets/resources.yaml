@@ -1,0 +1,20 @@
+layouts:
+  main_menu: "../assets/layouts/main_menu_layout.yaml"
+  play_state: "../assets/layouts/play_stata_layout.yaml"
+
+fonts:
+  gothic: "../assets/fonts/IdealGothic Bold.otf"
+  poppins: "../assets/fonts/Poppins-Regular.ttf"
+
+textures:
+  wall: "../assets/textures/wall.png"
+  tank: "../assets/textures/blue_default.png"
+  enemy_tank: "../assets/textures/red_default.png"
+  bg: "../assets/textures/field.png"
+
+  firing_tank: "../assets/textures/blue_firing.png"
+  firing_enemy_tank: "../assets/textures/red_firing.png"
+  dead_tank: "../assets/textures/dead.png"
+  projectile: "../assets/textures/projectile.png"
+
+
